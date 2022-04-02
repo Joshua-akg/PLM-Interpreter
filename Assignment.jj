@@ -1,0 +1,18 @@
+PARSER_BEGIN(Assignment)
+
+public class Assignment{
+
+  public static void main(String args [])   {
+   
+    Assignment parser = new Assignment(System.in);
+   
+   }
+   
+}
+
+PARSER_END(Assignment)
+
+
+
+
+
