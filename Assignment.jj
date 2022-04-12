@@ -2,17 +2,43 @@ PARSER_BEGIN(Assignment)
 
 public class Assignment{
 
-  public static void main(String args [])   {
-   
-    Assignment parser = new Assignment(System.in);
-   
-   }
-   
+  public static void main(String args []) throws Exception {
+    try {
+      Assignment parser = new Assignment(System.in);
+    } catch (Exception e) {
+      System.out.println("You've had an error "+e.getMessage());
+    }
+  }
 }
 
 PARSER_END(Assignment)
 
+//Lexical Specification
 
+//Space
+TOKEN: { < SPACE: " " >}
+//End of line tokens
+TOKEN: { < EOL: "\n" | "\r" | "\r\n" >}
+//Arithmetic operators
+TOKEN: { < ADD: "+" > | < MUL: "*" > }
+//Parenthesis
+TOKEN: { < LPAREN: "(" > | < RPAREN: ")" > }
+//Curly braces
+TOKEN: { < LBRACE: "{" > | < RBRACE: "}" > }
+//Semi-colon
+TOKEN: { < SCOLON: ";" > }
+//Function definition - reserved word
+TOKEN: { < DEF: "DEF" > }
+//Main function - reserved word
+TOKEN: { < MAIN: "MAIN" > }
+//Function names
+TOKEN: { < FUNC: (["A"-"Z"])+ > }
+//Parameter names
+TOKEN: { < PARAM: (["a"-"z"])+ > }
+//Numeric literals
+TOKEN: { < NUM: (["0"-"9"])+ > }
 
+TOKEN: { < EOF: "\0" > }
 
-
+//Function definition : 
+// DEF <function-name> <parameter-name> <left-brace> <function body> <right-brace> <semicolon>
