@@ -5,11 +5,12 @@ public class Assignment{
   public static void main(String args []) throws Exception {
     try {
       Assignment parser = new Assignment(System.in);
-      int final = 0;
+      parser.Start(System.out);
     } catch (Exception e) {
       System.out.println("You've had an error "+e.getMessage());
     }
   }
+  int final = 0;
 }
 
 PARSER_END(Assignment)
@@ -105,7 +106,7 @@ int Factor(): {int result; Token n;}
 {
   n = <NUM> {return Integer.parseInt(n.image);}
   |
-  <FUNC> <LPAREN> result=Expression() <RPAREN> {return result;}
+  <FUNC> <LPAREN> {result=Expression()} <RPAREN> {return result;}
 }
 
 // < DEF > < FUNC > < PARAM > < LBRACE > < function body > < RBRACE > < SCOLON >
