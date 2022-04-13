@@ -1,3 +1,7 @@
+options{
+    STATIC = false;
+}
+
 PARSER_BEGIN(Assignment)
 
 public class Assignment{
@@ -10,7 +14,7 @@ public class Assignment{
       System.out.println("You've had an error "+e.getMessage());
     }
   }
-  int final = 0;
+  // int final = 0;
 }
 
 PARSER_END(Assignment)
@@ -50,44 +54,37 @@ void Program(PrintStream printStream) throws NumberFormatException:
 {} //local variabls
 {
   (Function())*
-  final = Main()
+  {
+    printStream.println(Main());
+  }
   (Function())*
   <EOF>
-  {
-    printStream.println(final);
-  }
 }
 
 //main function
 int Main() throws NumberFormatException:
 {int result;}
 {
-  <DEF> <MAIN> <LBRACE> 
+  <DEF><SPACE><MAIN><SPACE><LBRACE><SPACE> 
   {
     result = Expression()
   }
-  <RBRACE> <SCOLON> <EOL>
+  <SPACE><RBRACE><SPACE><SCOLON> <EOL>
   {return result;}
 }
 
 void Function() throws NumberFormatException:
 {int result;}
 {
-  DEF <FUNC> <PARAM> <LBRACE>
+  <DEF><SPACE><FUNC><SPACE><PARAM><SPACE><LBRACE><SPACE>
   {
     result = Expression()
   }
-  <RBRACE> <SCOLON> <EOL>
+  <SPACE><RBRACE><SPACE><SCOLON> <EOL>
   {return result;}
 }
 
 //function body
-// void Statement() throws NumberFormatException:
-
-// int StatementStart(): {int result;}
-// {
-//   result = Expression() {return sum;}
-// }
 
 int Expression(): {int result,x;}
 //returns the result of an expression where the expression is a sum of terms
@@ -108,5 +105,3 @@ int Factor(): {int result; Token n;}
   |
   <FUNC> <LPAREN> {result=Expression()} <RPAREN> {return result;}
 }
-
-// < DEF > < FUNC > < PARAM > < LBRACE > < function body > < RBRACE > < SCOLON >
