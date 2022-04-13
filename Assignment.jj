@@ -46,62 +46,81 @@ TOKEN: { < PARAM: (["a"-"z"])+ > }
 //Numeric literals
 TOKEN: { < NUM: (["0"-"9"])+ > }
 
+//Lexical Specification
+
+//Program consists of the main function and a series of function definitions
+//Program -> Main Function | Function Definition
+
+
+//Main -> DEF MAIN LBRACE EXPR RBRACE
+
+//Function -> DEF FUNC PARAM LBRACE EXPR RBRACE
+
+//EXPR -> TERM ADD TERM | TERM
+
+//TERM -> FACTOR MUL FACTOR | FACTOR
+
+//FACTOR -> NUM | Function
+
+
+
+
 //Function definition : 
 // DEF <function-name> <parameter-name> <left-brace> <function body> <right-brace> <semicolon>
 
-//print result of program
-void Program(PrintStream printStream) throws NumberFormatException:
-{} //local variabls
-{
-  (Function())*
-  {
-    printStream.println(Main());
-  }
-  (Function())*
-  <EOF>
-}
+// //print result of program
+// void Program(PrintStream printStream) throws NumberFormatException:
+// {} //local variabls
+// {
+//   (Function())*
+//   {
+//     printStream.println(Main());
+//   }
+//   (Function())*
+//   <EOF>
+// }
 
-//main function
-int Main() throws NumberFormatException:
-{int result;}
-{
-  <DEF><SPACE><MAIN><SPACE><LBRACE><SPACE> 
-  {
-    result = Expression()
-  }
-  <SPACE><RBRACE><SPACE><SCOLON> <EOL>
-  {return result;}
-}
+// //main function
+// int Main() throws NumberFormatException:
+// {int result;}
+// {
+//   <DEF><SPACE><MAIN><SPACE><LBRACE><SPACE> 
+//   {
+//     result = Expression()
+//   }
+//   <SPACE><RBRACE><SPACE><SCOLON> <EOL>
+//   {return result;}
+// }
 
-void Function() throws NumberFormatException:
-{int result;}
-{
-  <DEF><SPACE><FUNC><SPACE><PARAM><SPACE><LBRACE><SPACE>
-  {
-    result = Expression()
-  }
-  <SPACE><RBRACE><SPACE><SCOLON> <EOL>
-  {return result;}
-}
+// void Function() throws NumberFormatException:
+// {int result;}
+// {
+//   <DEF><SPACE><FUNC><SPACE><PARAM><SPACE><LBRACE><SPACE>
+//   {
+//     result = Expression()
+//   }
+//   <SPACE><RBRACE><SPACE><SCOLON> <EOL>
+//   {return result;}
+// }
 
-//function body
+// //function body
 
-int Expression(): {int result,x;}
-//returns the result of an expression where the expression is a sum of terms
-{
-  result = Term() (<ADD> x = Term() {returm result += x;})* {return result;} 
-}
+// int Expression(): {int result,x;}
+// //returns the result of an expression where the expression is a sum of terms
+// {
+//   result = Term() (<ADD> x = Term() {returm result += x;})* {return result;} 
+// }
 
-int Term(): {int result,x;}
-//returns the result of a term where the term is a product of factors
-{
-  result = Factor() (<MUL> x = Factor() {return result *= x;})* {return result;}
-}
+// int Term(): {int result,x;}
+// //returns the result of a term where the term is a product of factors
+// {
+//   result = Factor() (<MUL> x = Factor() {return result *= x;})* {return result;}
+// }
 
-int Factor(): {int result; Token n;}
-//returns the result of a factor where the factor is a number or a function call
-{
-  n = <NUM> {return Integer.parseInt(n.image);}
-  |
-  <FUNC> <LPAREN> {result=Expression()} <RPAREN> {return result;}
-}
+// int Factor(): {int result; Token n;}
+// //returns the result of a factor where the factor is a number or a function call
+// {
+//   n = <NUM> {return Integer.parseInt(n.image);}
+//   |
+//   <FUNC> <LPAREN> {result=Expression()} <RPAREN> {return result;}
+// }
