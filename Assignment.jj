@@ -84,5 +84,5 @@ void Term(): {} {
 
 //FACTOR -> NUM | Function
 void Factor(): {} {
-  <NUM> | Function_Call()
+  <NUM> | Function_Call() | <PARAM>
 }

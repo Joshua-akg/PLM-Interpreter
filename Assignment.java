@@ -121,6 +121,9 @@
     case FUNC:
       Function_Call();
       break;
+    case PARAM:
+      jj_consume_token(PARAM);
+      break;
     default:
       jj_la1[4] = jj_gen;
       jj_consume_token(-1);
@@ -143,7 +146,7 @@
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x8000,0x1800,0x8,0x10,0x5000,};
+      jj_la1_0 = new int[] {0x8000,0x1800,0x8,0x10,0x7000,};
    }
 
   /** Constructor with InputStream. */
