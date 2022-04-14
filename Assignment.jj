@@ -1,4 +1,6 @@
+//set lookahead to 2
 options{
+  lookahead = 2;
   STATIC = false;
 }
 
@@ -51,8 +53,13 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 //Program consists of the main function and a series of function definitions
 //Program -> Main Function | Function Definition
 void Program(): {} {
-  (<DEFINE> ( Function() | Main() ) )* <EOF>
+  (<DEFINE> Function())* 
+  <DEFINE> Main()
+  (<DEFINE> Function())*
+  <EOF>  
 }
+
+//(<DEFINE> (Function))* (<DEFINE> Main()) (<DEFINE> (Function))* <EOF>
 
 //Main -> DEF MAIN FUNFunctionBody
 void Main(): {} {
