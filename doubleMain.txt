@@ -1,0 +1,3 @@
+DEF MAIN { 4 } ;
+DEF MAIN { 5 } ;
+DEF EF x { 10*x } ;

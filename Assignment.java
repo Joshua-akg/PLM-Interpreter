@@ -41,14 +41,14 @@
     jj_consume_token(0);
   }
 
-//Main -> DEF MAIN FUNCTIONBODY LBRACE EXPR RBRACE
+//Main -> DEF MAIN FUNFunctionBody
   final public void Main() throws ParseException {
     jj_consume_token(MAIN);
     jj_consume_token(SPACE);
     FunctionBody();
   }
 
-//Function -> DEF FUNC PARAM LBRACE EXPR RBRACE
+//Function -> FUNC PARAM FunctionBody
   final public void Function() throws ParseException {
     jj_consume_token(FUNC);
     jj_consume_token(SPACE);
@@ -57,6 +57,7 @@
     FunctionBody();
   }
 
+//FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
   final public void FunctionBody() throws ParseException {
     jj_consume_token(LBRACE);
     jj_consume_token(SPACE);
@@ -112,7 +113,7 @@
     }
   }
 
-//FACTOR -> NUM | Function
+//FACTOR -> NUM | Function | Parameter
   final public void Factor() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NUM:

@@ -43,6 +43,7 @@ TOKEN: { < PARAM: (["a"-"z"])+ > }
 //Numeric literals
 TOKEN: { < NUM: (["0"-"9"])+ > }
 //Begining of a function definition
+//Use of define to eliminate need of lookahead
 TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
 //Lexical Specification
@@ -53,16 +54,17 @@ void Program(): {} {
   (<DEFINE> ( Function() | Main() ) )* <EOF>
 }
 
-//Main -> DEF MAIN FUNCTIONBODY LBRACE EXPR RBRACE
+//Main -> DEF MAIN FUNFunctionBody
 void Main(): {} {
   <MAIN> <SPACE> FunctionBody()
 }
 
-//Function -> DEF FUNC PARAM LBRACE EXPR RBRACE
+//Function -> FUNC PARAM FunctionBody
 void Function(): {} {
   <FUNC> <SPACE> <PARAM> <SPACE> FunctionBody()
 }
 
+//FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
 void FunctionBody(): {} {
   <LBRACE> <SPACE> (Expression()) <SPACE> <RBRACE> <SPACE> <SCOLON> <EOL>
 }
@@ -82,7 +84,7 @@ void Term(): {} {
   Factor() ( <MUL> Factor() )*
 }
 
-//FACTOR -> NUM | Function
+//FACTOR -> NUM | Function | Parameter
 void Factor(): {} {
   <NUM> | Function_Call() | <PARAM>
 }
