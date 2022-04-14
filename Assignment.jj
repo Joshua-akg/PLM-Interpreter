@@ -1,30 +1,27 @@
 options{
-    STATIC = false;
+  STATIC = false;
 }
 
 PARSER_BEGIN(Assignment)
-
-public class Assignment{
-
-  public static void main(String args []) throws Exception {
-    try {
-      Assignment parser = new Assignment(System.in);
-      parser.Start(System.out);
-    } catch (Exception e) {
-      System.out.println("You've had an error "+e.getMessage());
+  public class Assignment{
+    public static void main(String args []) throws Exception {
+      try {
+        new Assignment(System.in).Program();
+        System.out.println("Syntax is okay");
+      } catch (Exception e) {
+        System.out.println("Syntax failure: " + e.getMessage());
+      }     
     }
   }
-  // int final = 0;
-}
 
 PARSER_END(Assignment)
 
 //Lexical Specification
 
 //Space
-TOKEN: { < SPACE: " " >}
+TOKEN: { < SPACE: " " > }
 //End of line tokens
-TOKEN: { < EOL: "\n" | "\r" | "\r\n" >}
+TOKEN: { < EOL: "\n" | "\r" | "\r\n" > }
 //End of file
 // TOKEN: { <EOF: "\0">}
 //Arithmetic operators
@@ -45,82 +42,47 @@ TOKEN: { < MAIN: "MAIN" > | < FUNC: (["A"-"Z"])+ > }
 TOKEN: { < PARAM: (["a"-"z"])+ > }
 //Numeric literals
 TOKEN: { < NUM: (["0"-"9"])+ > }
+//Begining of a function definition
+TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
 //Lexical Specification
 
 //Program consists of the main function and a series of function definitions
 //Program -> Main Function | Function Definition
+void Program(): {} {
+  (<DEFINE> ( Function() | Main() ) )* <EOF>
+}
 
-
-//Main -> DEF MAIN LBRACE EXPR RBRACE
+//Main -> DEF MAIN FUNCTIONBODY LBRACE EXPR RBRACE
+void Main(): {} {
+  <MAIN> <SPACE> FunctionBody()
+}
 
 //Function -> DEF FUNC PARAM LBRACE EXPR RBRACE
+void Function(): {} {
+  <FUNC> <SPACE> <PARAM> <SPACE> FunctionBody()
+}
+
+void FunctionBody(): {} {
+  <LBRACE> <SPACE> (Expression()) <SPACE> <RBRACE> <SPACE> <SCOLON> <EOL>
+}
+
+//Function_Call -> FUNC LPAREN EXPR RPAREN
+void Function_Call(): {} {
+  <FUNC> <LPAREN> Expression() <RPAREN>
+}
 
 //EXPR -> TERM ADD TERM | TERM
+void Expression(): {} {
+  Term() ( <ADD> Term() )*
+}
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
+void Term(): {} {
+  Factor() ( <MUL> Factor() )*
+}
 
 //FACTOR -> NUM | Function
-
-
-
-
-//Function definition : 
-// DEF <function-name> <parameter-name> <left-brace> <function body> <right-brace> <semicolon>
-
-// //print result of program
-// void Program(PrintStream printStream) throws NumberFormatException:
-// {} //local variabls
-// {
-//   (Function())*
-//   {
-//     printStream.println(Main());
-//   }
-//   (Function())*
-//   <EOF>
-// }
-
-// //main function
-// int Main() throws NumberFormatException:
-// {int result;}
-// {
-//   <DEF><SPACE><MAIN><SPACE><LBRACE><SPACE> 
-//   {
-//     result = Expression()
-//   }
-//   <SPACE><RBRACE><SPACE><SCOLON> <EOL>
-//   {return result;}
-// }
-
-// void Function() throws NumberFormatException:
-// {int result;}
-// {
-//   <DEF><SPACE><FUNC><SPACE><PARAM><SPACE><LBRACE><SPACE>
-//   {
-//     result = Expression()
-//   }
-//   <SPACE><RBRACE><SPACE><SCOLON> <EOL>
-//   {return result;}
-// }
-
-// //function body
-
-// int Expression(): {int result,x;}
-// //returns the result of an expression where the expression is a sum of terms
-// {
-//   result = Term() (<ADD> x = Term() {returm result += x;})* {return result;} 
-// }
-
-// int Term(): {int result,x;}
-// //returns the result of a term where the term is a product of factors
-// {
-//   result = Factor() (<MUL> x = Factor() {return result *= x;})* {return result;}
-// }
-
-// int Factor(): {int result; Token n;}
-// //returns the result of a factor where the factor is a number or a function call
-// {
-//   n = <NUM> {return Integer.parseInt(n.image);}
-//   |
-//   <FUNC> <LPAREN> {result=Expression()} <RPAREN> {return result;}
-// }
+void Factor(): {} {
+  <NUM> | Function_Call()
+}
