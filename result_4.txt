@@ -1,0 +1,4 @@
+FAIL
+=====
+1
+Missing keyword DEF
