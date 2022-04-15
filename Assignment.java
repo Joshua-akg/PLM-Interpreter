@@ -205,16 +205,27 @@
 
 //EXPR -> TERM ADD TERM | TERM
   final public void Expression() throws ParseException {
-    Term();
-    label_3:
-    while (true) {
-      if (jj_2_3(2)) {
-        ;
-      } else {
-        break label_3;
-      }
-      jj_consume_token(ADD);
+    try {
       Term();
+      label_3:
+      while (true) {
+        if (jj_2_3(2)) {
+          ;
+        } else {
+          break label_3;
+        }
+        jj_consume_token(ADD);
+        Term();
+      }
+    } catch (ParseException e) {
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+
+    //throw new excpetion with a custom message
+    {if (true) throw new ParseException(lineNumber+"\nIncorrect Expression Format");}
     }
   }
 
@@ -302,25 +313,9 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
   private boolean jj_3_1() {
     if (jj_3R_5()) return true;
     if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
     return false;
   }
 
@@ -342,20 +337,8 @@
     return false;
   }
 
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
+  private boolean jj_3R_5() {
+    if (jj_scan_token(DEFINE)) return true;
     return false;
   }
 
@@ -369,9 +352,37 @@
     return false;
   }
 
+  private boolean jj_3R_6() {
+    if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
   private boolean jj_3R_9() {
     if (jj_scan_token(FUNC)) return true;
     if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_scan_token(MUL)) return true;
+    if (jj_3R_8()) return true;
     return false;
   }
 

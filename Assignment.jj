@@ -200,20 +200,11 @@ void FunctionBody(): {} {
   }
 }
 
-//Function_Call -> FUNC LPAREN EXPR RPAREN
-void Function_Call():
-{Token t;}
-{
+//EXPR -> TERM ADD TERM | TERM
+void Expression(): {} {
   try {
-    t = <FUNC>
-    // { //Check if function has been defined
-    //   if (!functionNames.contains(t.image)) {
-    //     System.err.println(t.beginLine+"\nFunction " + t.image + " not defined");
-    //     System.exit(0);
-    //   }
-    // }
-    <LPAREN> Expression() <RPAREN>
-  } catch (ParseException e) { //catch error thrown for incorrect function call Format
+    Term() ( <ADD> Term() )*
+  } catch (ParseException e) {
     //extract line number from Exception
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -221,13 +212,8 @@ void Function_Call():
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"\nIncorrect Function Call Format");
+    throw new ParseException(lineNumber+"\nWrong Expression Format");
   }
-}
-
-//EXPR -> TERM ADD TERM | TERM
-void Expression(): {} {
-  Term() ( <ADD> Term() )*
 }
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
@@ -245,4 +231,22 @@ void Factor(): {} {
     System.exit(0);
   }
   | <PARAM> | <NUM>
+}
+
+//Function_Call -> FUNC LPAREN EXPR RPAREN
+void Function_Call():
+{Token t;}
+{
+  try {
+    t = <FUNC> <LPAREN> Expression() <RPAREN>
+  } catch (ParseException e) { //catch error thrown for incorrect function call Format
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+
+    //throw new excpetion with a custom message
+    throw new ParseException(lineNumber+"\nIncorrect Function Call Format");
+  }
 }
