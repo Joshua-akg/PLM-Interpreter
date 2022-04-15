@@ -9,9 +9,7 @@
         new Assignment(System.in).Program();
         System.out.println("Syntax is okay: PASS");
       } catch (Exception e) {
-        System.out.println("Syntax failure HERE: ");
-
-        // int lineNumber = e.getMessage().indexOf("line") + 5;
+        System.out.println("Syntax error detected: FAIL");
         System.err.println(e.getMessage());
       }
     }
@@ -27,6 +25,7 @@
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
+
     //throw new excpetion with a custom message
     {if (true) throw new ParseException(lineNumber+"\nEach Function must start with (DEF)");}
     }
@@ -103,15 +102,14 @@
       FunctionBody();
     } catch (ParseException e) {
                                //Catch error thrown for missing function name
-    int lineNumber = e.getMessage().indexOf("line") + 5;
-    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
 
-    System.err.println("Incorrect Function Format");
-
-    {if (true) throw new ParseException("");}
-
-    // System.exit(0);
-
+    //throw new excpetion with a custom message
+    {if (true) throw new ParseException(lineNumber+"\nIncorrect Function Format");}
     }
   }
 

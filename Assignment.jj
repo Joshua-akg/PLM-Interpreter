@@ -63,6 +63,7 @@ void Definition(): {} {
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
+
     //throw new excpetion with a custom message
     throw new ParseException(lineNumber+"\nEach Function must start with (DEF)");
   }
@@ -118,14 +119,14 @@ void Function():
     } 
     <SPACE> <PARAM> <SPACE> FunctionBody()
   } catch (ParseException e) { //Catch error thrown for missing function name
-    int lineNumber = e.getMessage().indexOf("line") + 5;
-    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
 
-    System.err.println("Incorrect Function Format");
-    
-    throw new ParseException("");
-    
-    // System.exit(0);
+    //throw new excpetion with a custom message
+    throw new ParseException(lineNumber+"\nIncorrect Function Format");
   }
 }
 
@@ -136,13 +137,13 @@ void FunctionBody(): {} {
   try {
     Expression()
   } catch (ParseException e) { //Catch error thrown for wrong expression
-    int lineNumber = e.getMessage().indexOf("line") + 5;
-    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
 
-    System.err.println("Incorrect Expression Format");
-    // System.exit(0);
-
-    throw new ParseException("");
+    throw new ParseException(lineNumber+"Incorrect Expression Format");
   }  
   
   <SPACE> <RBRACE> <SPACE> <SCOLON> 
@@ -150,14 +151,15 @@ void FunctionBody(): {} {
   try {
     <EOL>
   } catch (ParseException e) { //Catch error thrown for wrong line terminator
-    int lineNumber = e.getMessage().indexOf("line") + 5;
+    \\extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    
+    int lineNumber = Integer.parseInt(temp);
 
-    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
-    System.err.println("Invalid line terminator");
-
-    // System.exit(0);
-
-    throw new ParseException("");
+    //throw new excpetion with a custom message
+    throw new ParseException(lineNumber+"Invalid line terminator");
   }
 }
 
