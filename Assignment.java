@@ -71,6 +71,9 @@
       jj_consume_token(0);
     } catch (ParseException e) {
                                //Catch error thrown for duplicate main
+    if (e.getMessage().contains("Wrong"))
+      {if (true) throw e;}
+
     //get current line number
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -106,6 +109,9 @@
       FunctionBody();
     } catch (ParseException e) {
                                //Catch error thrown for incorrect main function Format
+    if (e.getMessage().contains("Wrong"))
+      {if (true) throw e;}
+
     //get current line number
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -124,8 +130,7 @@
       //Check if a function with the same name has already been defined
       functionName = t.image;
       if (functionNames.contains(functionName)) {
-        System.err.println(t.beginLine+"\nFunction " + functionName + " already defined");
-        System.exit(0);
+        {if (true) throw new ParseException(t.beginLine+"\nWrong Function Definition" + functionName + " already defined");}
       } else {
         functionNames.add(functionName);
       }
@@ -179,6 +184,9 @@
       jj_consume_token(EOL);
     } catch (ParseException e) {
                                //Catch error thrown for wrong line terminator
+    if (e.getMessage().contains("Wrong"))
+      {if (true) throw e;}
+
     String tem = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
@@ -222,16 +230,31 @@
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
   final public void Term() throws ParseException {
-    Factor();
-    label_4:
-    while (true) {
-      if (jj_2_4(2)) {
-        ;
-      } else {
-        break label_4;
-      }
-      jj_consume_token(MUL);
+    try {
       Factor();
+      label_4:
+      while (true) {
+        if (jj_2_4(2)) {
+          ;
+        } else {
+          break label_4;
+        }
+        jj_consume_token(MUL);
+        Factor();
+      }
+    } catch (ParseException e) {
+    if (e.getMessage().contains("Wrong")) {
+      {if (true) throw e;}
+    }
+
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+
+    //throw new excpetion with a custom message
+    {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
     }
   }
 
@@ -250,7 +273,7 @@
         throw new ParseException();
       }
     } catch (ParseException e) {
-    if (e.getMessage().contains("Wrong Function Call Format"))
+    if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
     else {
       //extract line number from Exception
@@ -270,11 +293,18 @@
  Token t;
     try {
       t = jj_consume_token(FUNC);
+      if (!functionNames.contains(t.image)) {
+        {if (true) throw new ParseException(t.beginLine+"\nWrong Function call. " + t.image + " not defined");}
+      }
       jj_consume_token(LPAREN);
       Expression();
       jj_consume_token(RPAREN);
     } catch (ParseException e) {
                                //catch error thrown for incorrect function call Format
+    if (e.getMessage().contains("Wrong")) {
+      {if (true) throw e;}
+    }
+
     //extract line number from Exception
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -282,7 +312,7 @@
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    System.out.println("INTERESTING!");
+    // System.out.println("INTERESTING!");
     {if (true) throw new ParseException(lineNumber+"\nWrong Function Call Format");}
     }
   }
@@ -336,9 +366,14 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_7()) return true;
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_scan_token(DEFINE)) return true;
     return false;
   }
 
@@ -347,15 +382,8 @@
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
-    if (jj_3R_8()) return true;
+  private boolean jj_3R_6() {
+    if (jj_scan_token(FUNC)) return true;
     return false;
   }
 
@@ -364,8 +392,8 @@
     return false;
   }
 
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
+  private boolean jj_3R_7() {
+    if (jj_3R_8()) return true;
     return false;
   }
 
@@ -388,11 +416,6 @@
     return false;
   }
 
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
   private boolean jj_3_6() {
     if (jj_scan_token(PARAM)) return true;
     return false;
@@ -404,7 +427,14 @@
     return false;
   }
 
-  private boolean jj_3R_7() {
+  private boolean jj_3_3() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_scan_token(MUL)) return true;
     if (jj_3R_8()) return true;
     return false;
   }
