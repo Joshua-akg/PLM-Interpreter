@@ -1,0 +1,3 @@
+DEF PP xx { 4 } ;
+DEF PP xx { 3 } ;
+DEF MAIN { PP(0)+3 } ;
