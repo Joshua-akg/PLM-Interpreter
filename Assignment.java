@@ -34,11 +34,11 @@
 //(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
 //(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
 //(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
-//(10) - [CORRECT]  //(11) - [INCORRECT]  //(12) - [CORRECT]
+//(10) - [CORRECT]  //(11) - [CORRECT]  //(12) - [CORRECT]
 
 //TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
 //TODO: (8) - Make sure function calls refer to defined functions in the same file #
-//TODO: (11) - Make sure functions can only be defined once in the same file
+//TODO: (11) - Handle error reporting for duplicate functions
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
@@ -85,13 +85,13 @@
 //Function -> FUNC PARAM FunctionBody
   final public void Function() throws ParseException {
   String functionName = "";
-  Token temp;
+  Token t;
     try {
-      temp = jj_consume_token(FUNC);
+      t = jj_consume_token(FUNC);
       //Check if a function with the same name has already been defined
-      functionName = temp.image;
+      functionName = t.image;
       if (functionNames.contains(functionName)) {
-        System.err.println("Function " + functionName + " already defined");
+        System.err.println(t.beginLine+"\nFunction " + functionName + " already defined");
         System.exit(0);
       } else {
         functionNames.add(functionName);
@@ -121,13 +121,13 @@
       Expression();
     } catch (ParseException e) {
                                //Catch error thrown for wrong expression
-    int lineNumber = e.getMessage().indexOf("line") + 5;
-    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    //extract line number from Exception
+    String tem = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(tem);
 
-    System.err.println("Incorrect Expression Format");
-    // System.exit(0);
-
-    {if (true) throw new ParseException("");}
+    {if (true) throw new ParseException(lineNumber+"Incorrect Expression Format");}
     }
     jj_consume_token(SPACE);
     jj_consume_token(RBRACE);
@@ -137,14 +137,14 @@
       jj_consume_token(EOL);
     } catch (ParseException e) {
                                //Catch error thrown for wrong line terminator
-    int lineNumber = e.getMessage().indexOf("line") + 5;
+    String tem = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
 
-    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
-    System.err.println("Invalid line terminator");
+    int lineNumber = Integer.parseInt(tem);
 
-    // System.exit(0);
-
-    {if (true) throw new ParseException("");}
+    //throw new excpetion with a custom message
+    {if (true) throw new ParseException(lineNumber+"Invalid line terminator");}
     }
   }
 
