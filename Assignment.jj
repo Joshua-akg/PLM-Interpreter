@@ -80,7 +80,7 @@ void Definition(): {} {
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
-void Program(): {} {
+void Program(): {Token t;} {
   (Definition() Function())* 
   
   Definition()
@@ -88,17 +88,25 @@ void Program(): {} {
     Main()
   } catch (ParseException e) { //Catch error thrown for missing main function
     int lineNumber = 0;
-
     throw new ParseException(lineNumber+"\nMissing Main Function");
   }
 
-  (Definition() Function())*  
-  <EOF>  
+  try {
+    (Definition() Function())* 
+    <EOF>  
+  } catch (ParseException e) { //Catch error thrown for duplicate main
+    //get current line number
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+    throw new ParseException(lineNumber+"\nDuplicate Main Function"); 
+  }
 }
 
 //Main -> MAIN FunctionBody
 void Main(): {} {
-  <MAIN> <SPACE> FunctionBody()
+  <MAIN> FunctionBody()
 }
 
 //Function -> FUNC PARAM FunctionBody
@@ -117,7 +125,7 @@ void Function():
         functionNames.add(functionName);
       }
     } 
-    <SPACE> <PARAM> <SPACE> FunctionBody()
+    <SPACE> <PARAM> FunctionBody()
   } catch (ParseException e) { //Catch error thrown for missing function name
     //extract line number from Exception
     String temp = e.getMessage().substring(
@@ -132,7 +140,7 @@ void Function():
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
 void FunctionBody(): {} {
-  <LBRACE> <SPACE> 
+  <SPACE> <LBRACE> <SPACE> 
   
   try {
     Expression()
@@ -145,7 +153,6 @@ void FunctionBody(): {} {
 
     throw new ParseException(lineNumber+"Incorrect Expression Format");
   }  
-  
   <SPACE> <RBRACE> <SPACE> <SCOLON> 
 
   try {
