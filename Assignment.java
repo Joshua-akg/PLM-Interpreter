@@ -76,7 +76,11 @@
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
-    {if (true) throw new ParseException(lineNumber+"\nDuplicate Main Function");}
+
+    if (e.getMessage().contains("MAIN")) {
+      {if (true) throw new ParseException(lineNumber+"\nDuplicate Main Function");}
+    }
+    {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
     }
   }
 
@@ -86,8 +90,17 @@
       jj_consume_token(MAIN);
     } catch (ParseException e) {
                                //Catch error thrown for missing main function
-    // int lineNumber = 0;
-    {if (true) throw new ParseException("Missing Main Function");}
+    //get current line number
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+    if (e.getMessage().contains("DEF")) {
+      {if (true) throw new ParseException(lineNumber+"\nIncorrect Function Format");}
+    }
+
+    lineNumber = 0;
+    {if (true) throw new ParseException(lineNumber+"\nMissing Main Function");}
     }
     try {
       FunctionBody();
@@ -128,6 +141,7 @@
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
+    // System.err.println(lineNumber+". Incorrect Function Format");
     {if (true) throw new ParseException(lineNumber+"\nIncorrect Function Format");}
     }
   }
@@ -288,14 +302,8 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_7()) return true;
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 
@@ -305,41 +313,14 @@
     return false;
   }
 
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_7() {
+  private boolean jj_3_4() {
+    if (jj_scan_token(MUL)) return true;
     if (jj_3R_8()) return true;
     return false;
   }
 
   private boolean jj_3R_5() {
     if (jj_scan_token(DEFINE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
-    if (jj_3R_8()) return true;
     return false;
   }
 
@@ -358,6 +339,39 @@
 
   private boolean jj_3_5() {
     if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_7() {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 

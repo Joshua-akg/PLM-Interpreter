@@ -89,7 +89,7 @@ void Program(): {Token t;} {
     Main()
   // } catch (ParseException e) { //Catch error thrown for missing main function
   //   int lineNumber = 0;
-  //   throw new ParseException(lineNumber+"\nMissing Main Function");
+  //   throw new ParseException("0. Missing Main Function");
   // }
 
   try {
@@ -101,7 +101,11 @@ void Program(): {Token t;} {
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
-    throw new ParseException(lineNumber+"\nDuplicate Main Function"); 
+
+    if (e.getMessage().contains("MAIN")) {
+      throw new ParseException(lineNumber+"\nDuplicate Main Function");
+    }
+    throw new ParseException(lineNumber+"\nWrong Function Format"); 
   }
 }
 
@@ -110,8 +114,17 @@ void Main(): {} {
   try {
     <MAIN>
   } catch (ParseException e) { //Catch error thrown for missing main function
-    // int lineNumber = 0;
-    throw new ParseException("Missing Main Function");
+    //get current line number
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+    if (e.getMessage().contains("DEF")) {
+      throw new ParseException(lineNumber+"\nIncorrect Function Format");
+    }
+
+    lineNumber = 0;
+    throw new ParseException(lineNumber+"\nMissing Main Function");
   }
 
   try {
@@ -151,6 +164,7 @@ void Function():
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
+    // System.err.println(lineNumber+". Incorrect Function Format");
     throw new ParseException(lineNumber+"\nIncorrect Function Format");
   }
 }
