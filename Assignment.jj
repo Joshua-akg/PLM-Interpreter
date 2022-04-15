@@ -4,6 +4,7 @@ options{
 }
 
 PARSER_BEGIN(Assignment)
+  import java.util.*;
   public class Assignment{
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
@@ -13,7 +14,8 @@ PARSER_BEGIN(Assignment)
         new Assignment(System.in).Program();
         System.out.println("Syntax is okay: PASS");
       } catch (Exception e) {
-        System.out.println("Syntax failure HERE: " + e.getMessage());
+        System.out.println("Syntax error detected: FAIL");
+        System.err.println(e.getMessage());
       }     
     }
   }
@@ -52,6 +54,20 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
 //Lexical Specification
 
+void Definition(): {} {
+  try {
+    <DEFINE>
+  } catch (ParseException e) { //Catch error thrown for wrong expression
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+    //throw new excpetion with a custom message
+    throw new ParseException(lineNumber+"\nEach Function must start with (DEF)");
+  }
+}
+
 //(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
 //(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
 //(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
@@ -64,20 +80,18 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
 void Program(): {} {
-  (<DEFINE> Function())* 
+  (Definition() Function())* 
   
-  <DEFINE>
+  Definition()
   try {
     Main()
   } catch (ParseException e) { //Catch error thrown for missing main function
     int lineNumber = 0;
-    System.err.println(lineNumber);
-    System.err.println("Missing Main Function");
-    System.exit(0);
+
+    throw new ParseException(lineNumber+"\nMissing Main Function");
   }
 
-  (<DEFINE> Function())*
-  
+  (Definition() Function())*  
   <EOF>  
 }
 
@@ -87,15 +101,31 @@ void Main(): {} {
 }
 
 //Function -> FUNC PARAM FunctionBody
-void Function(): {} {
+void Function(): 
+{ String functionName = "";
+  Token temp;} 
+{
   try {
-    <FUNC> <SPACE> <PARAM> <SPACE> FunctionBody()
+    temp = <FUNC> 
+    { //Check if a function with the same name has already been defined
+      functionName = temp.image;
+      if (functionNames.contains(functionName)) {
+        System.err.println("Function " + functionName + " already defined");
+        System.exit(0);
+      } else {
+        functionNames.add(functionName);
+      }
+    } 
+    <SPACE> <PARAM> <SPACE> FunctionBody()
   } catch (ParseException e) { //Catch error thrown for missing function name
     int lineNumber = e.getMessage().indexOf("line") + 5;
     System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
 
     System.err.println("Incorrect Function Format");
-    System.exit(0);
+    
+    throw new ParseException("");
+    
+    // System.exit(0);
   }
 }
 
@@ -110,10 +140,13 @@ void FunctionBody(): {} {
     System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
 
     System.err.println("Incorrect Expression Format");
-    System.exit(0);}  
+    // System.exit(0);
+
+    throw new ParseException("");
+  }  
   
   <SPACE> <RBRACE> <SPACE> <SCOLON> 
-  
+
   try {
     <EOL>
   } catch (ParseException e) { //Catch error thrown for wrong line terminator
@@ -122,7 +155,9 @@ void FunctionBody(): {} {
     System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
     System.err.println("Invalid line terminator");
 
-    System.exit(0);
+    // System.exit(0);
+
+    throw new ParseException("");
   }
 }
 
