@@ -120,7 +120,7 @@ void Main(): {} {
     );
     int lineNumber = Integer.parseInt(temp);
     if (e.getMessage().contains("DEF")) {
-      throw new ParseException(lineNumber+"\nIncorrect Function Format");
+      throw new ParseException(lineNumber+"\nWrong Function Format");
     }
 
     lineNumber = 0;
@@ -135,7 +135,7 @@ void Main(): {} {
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
-    throw new ParseException(lineNumber+"\nIncorrect Main Function Format"); 
+    throw new ParseException(lineNumber+"\nWrong Main Function Format"); 
   }
 }
 
@@ -156,7 +156,12 @@ void Function():
       }
     } 
     <SPACE> <PARAM> FunctionBody()
-  } catch (ParseException e) { //Catch error thrown for missing function name
+  } catch (ParseException e) { 
+    if (e.getMessage().contains("Wrong")) {
+      throw e;
+    }
+    
+    //Catch error thrown for missing function name
     //extract line number from Exception
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -164,8 +169,8 @@ void Function():
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    // System.err.println(lineNumber+". Incorrect Function Format");
-    throw new ParseException(lineNumber+"\nIncorrect Function Format");
+    // System.err.println(lineNumber+". Wrong Function Format");
+    throw new ParseException(lineNumber+"\nWrong Function Format");
   }
 }
 
@@ -177,12 +182,16 @@ void FunctionBody(): {} {
     Expression()
   } catch (ParseException e) { //Catch error thrown for wrong expression
     //extract line number from Exception
+
+    if (e.getMessage().contains("Wrong"))
+      throw e;
+
     String tem = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(tem);
 
-    throw new ParseException(lineNumber+"Incorrect Expression Format");
+    throw new ParseException(lineNumber+"Wrong Expression Format");
   }  
   <SPACE> <RBRACE> <SPACE> <SCOLON> 
 
@@ -205,6 +214,10 @@ void Expression(): {} {
   try {
     Term() ( <ADD> Term() )*
   } catch (ParseException e) {
+    if (e.getMessage().contains("Wrong")) {
+      throw e;
+    }
+
     //extract line number from Exception
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -225,12 +238,21 @@ void Term(): {} {
 //add check to make sure function calls refer to defined functions in the same file
 void Factor(): {} {
   try {
-    Function_Call()
+    Function_Call() | <PARAM> | <NUM>
   } catch (ParseException e) {
-    System.err.println(e.getMessage());
-    System.exit(0);
+    if (e.getMessage().contains("Wrong Function Call Format"))
+      throw e;
+    else {
+      //extract line number from Exception
+      String temp = e.getMessage().substring(
+        e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+      );
+      int lineNumber = Integer.parseInt(temp);
+
+      //throw new excpetion with a custom message
+      throw new ParseException(lineNumber+"\nWrong Expression Format");
+    }
   }
-  | <PARAM> | <NUM>
 }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
@@ -247,6 +269,7 @@ void Function_Call():
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"\nIncorrect Function Call Format");
+    System.out.println("INTERESTING!");
+    throw new ParseException(lineNumber+"\nWrong Function Call Format");
   }
 }

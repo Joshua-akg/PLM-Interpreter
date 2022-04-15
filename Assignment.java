@@ -96,7 +96,7 @@
     );
     int lineNumber = Integer.parseInt(temp);
     if (e.getMessage().contains("DEF")) {
-      {if (true) throw new ParseException(lineNumber+"\nIncorrect Function Format");}
+      {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
     }
 
     lineNumber = 0;
@@ -111,7 +111,7 @@
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
-    {if (true) throw new ParseException(lineNumber+"\nIncorrect Main Function Format");}
+    {if (true) throw new ParseException(lineNumber+"\nWrong Main Function Format");}
     }
   }
 
@@ -133,7 +133,11 @@
       jj_consume_token(PARAM);
       FunctionBody();
     } catch (ParseException e) {
-                               //Catch error thrown for missing function name
+    if (e.getMessage().contains("Wrong")) {
+      {if (true) throw e;}
+    }
+
+    //Catch error thrown for missing function name
     //extract line number from Exception
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -141,8 +145,8 @@
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    // System.err.println(lineNumber+". Incorrect Function Format");
-    {if (true) throw new ParseException(lineNumber+"\nIncorrect Function Format");}
+    // System.err.println(lineNumber+". Wrong Function Format");
+    {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
     }
   }
 
@@ -156,12 +160,16 @@
     } catch (ParseException e) {
                                //Catch error thrown for wrong expression
     //extract line number from Exception
+
+    if (e.getMessage().contains("Wrong"))
+      {if (true) throw e;}
+
     String tem = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(tem);
 
-    {if (true) throw new ParseException(lineNumber+"Incorrect Expression Format");}
+    {if (true) throw new ParseException(lineNumber+"Wrong Expression Format");}
     }
     jj_consume_token(SPACE);
     jj_consume_token(RBRACE);
@@ -182,27 +190,6 @@
     }
   }
 
-//Function_Call -> FUNC LPAREN EXPR RPAREN
-  final public void Function_Call() throws ParseException {
- Token t;
-    try {
-      t = jj_consume_token(FUNC);
-      jj_consume_token(LPAREN);
-      Expression();
-      jj_consume_token(RPAREN);
-    } catch (ParseException e) {
-                               //catch error thrown for incorrect function call Format
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
-    //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nIncorrect Function Call Format");}
-    }
-  }
-
 //EXPR -> TERM ADD TERM | TERM
   final public void Expression() throws ParseException {
     try {
@@ -218,6 +205,10 @@
         Term();
       }
     } catch (ParseException e) {
+    if (e.getMessage().contains("Wrong")) {
+      {if (true) throw e;}
+    }
+
     //extract line number from Exception
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -225,7 +216,7 @@
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nIncorrect Expression Format");}
+    {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
     }
   }
 
@@ -247,20 +238,52 @@
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
   final public void Factor() throws ParseException {
-    if (jj_2_5(2)) {
-      try {
+    try {
+      if (jj_2_5(2)) {
         Function_Call();
-      } catch (ParseException e) {
-    System.err.println(e.getMessage());
-    System.exit(0);
+      } else if (jj_2_6(2)) {
+        jj_consume_token(PARAM);
+      } else if (jj_2_7(2)) {
+        jj_consume_token(NUM);
+      } else {
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-    } else if (jj_2_6(2)) {
-      jj_consume_token(PARAM);
-    } else if (jj_2_7(2)) {
-      jj_consume_token(NUM);
-    } else {
-      jj_consume_token(-1);
-      throw new ParseException();
+    } catch (ParseException e) {
+    if (e.getMessage().contains("Wrong Function Call Format"))
+      {if (true) throw e;}
+    else {
+      //extract line number from Exception
+      String temp = e.getMessage().substring(
+        e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+      );
+      int lineNumber = Integer.parseInt(temp);
+
+      //throw new excpetion with a custom message
+      {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
+    }
+    }
+  }
+
+//Function_Call -> FUNC LPAREN EXPR RPAREN
+  final public void Function_Call() throws ParseException {
+ Token t;
+    try {
+      t = jj_consume_token(FUNC);
+      jj_consume_token(LPAREN);
+      Expression();
+      jj_consume_token(RPAREN);
+    } catch (ParseException e) {
+                               //catch error thrown for incorrect function call Format
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+
+    //throw new excpetion with a custom message
+    System.out.println("INTERESTING!");
+    {if (true) throw new ParseException(lineNumber+"\nWrong Function Call Format");}
     }
   }
 
@@ -313,9 +336,36 @@
     finally { jj_save(6, xla); }
   }
 
+  private boolean jj_3_3() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
   private boolean jj_3_1() {
     if (jj_3R_5()) return true;
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_scan_token(MUL)) return true;
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_scan_token(DEFINE)) return true;
     return false;
   }
 
@@ -332,28 +382,19 @@
     return false;
   }
 
-  private boolean jj_3_5() {
-    if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_7() {
-    if (jj_3R_8()) return true;
+  private boolean jj_3R_9() {
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
   private boolean jj_3R_6() {
     if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 
@@ -363,25 +404,7 @@
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
+  private boolean jj_3R_7() {
     if (jj_3R_8()) return true;
     return false;
   }
