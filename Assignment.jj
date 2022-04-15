@@ -16,6 +16,7 @@ PARSER_BEGIN(Assignment)
       } catch (Exception e) {
         System.out.println("Syntax error detected: FAIL");
         System.err.println(e.getMessage());
+        // e.printStackTrace();
       }     
     }
   }
@@ -84,12 +85,12 @@ void Program(): {Token t;} {
   (Definition() Function())* 
   
   Definition()
-  try {
+  // try {
     Main()
-  } catch (ParseException e) { //Catch error thrown for missing main function
-    int lineNumber = 0;
-    throw new ParseException(lineNumber+"\nMissing Main Function");
-  }
+  // } catch (ParseException e) { //Catch error thrown for missing main function
+  //   int lineNumber = 0;
+  //   throw new ParseException(lineNumber+"\nMissing Main Function");
+  // }
 
   try {
     (Definition() Function())* 
@@ -106,7 +107,23 @@ void Program(): {Token t;} {
 
 //Main -> MAIN FunctionBody
 void Main(): {} {
-  <MAIN> FunctionBody()
+  try {
+    <MAIN>
+  } catch (ParseException e) { //Catch error thrown for missing main function
+    // int lineNumber = 0;
+    throw new ParseException("Missing Main Function");
+  }
+
+  try {
+    FunctionBody()
+  } catch (ParseException e) { //Catch error thrown for incorrect main function Format
+    //get current line number
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+    throw new ParseException(lineNumber+"\nIncorrect Main Function Format"); 
+  }
 }
 
 //Function -> FUNC PARAM FunctionBody
@@ -170,8 +187,28 @@ void FunctionBody(): {} {
 }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
-void Function_Call(): {} {
-  <FUNC> <LPAREN> Expression() <RPAREN>
+void Function_Call():
+{Token t;}
+{
+  try {
+    t = <FUNC>
+    // { //Check if function has been defined
+    //   if (!functionNames.contains(t.image)) {
+    //     System.err.println(t.beginLine+"\nFunction " + t.image + " not defined");
+    //     System.exit(0);
+    //   }
+    // }
+    <LPAREN> Expression() <RPAREN>
+  } catch (ParseException e) { //catch error thrown for incorrect function call Format
+    //extract line number from Exception
+    String temp = e.getMessage().substring(
+      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
+    );
+    int lineNumber = Integer.parseInt(temp);
+
+    //throw new excpetion with a custom message
+    throw new ParseException(lineNumber+"\nIncorrect Function Call Format");
+  }
 }
 
 //EXPR -> TERM ADD TERM | TERM
@@ -187,5 +224,11 @@ void Term(): {} {
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
 void Factor(): {} {
-  Function_Call() | <PARAM> | <NUM>
+  try {
+    Function_Call()
+  } catch (ParseException e) {
+    System.err.println(e.getMessage());
+    System.exit(0);
+  }
+  | <PARAM> | <NUM>
 }
