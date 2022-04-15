@@ -1,0 +1,2 @@
+DEF TEST x { (x+3)*3 } ;
+DEF MAIN { TEST(3) } ;

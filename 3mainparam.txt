@@ -1,0 +1,2 @@
+DEF TEST x { x+3 } ;
+DEF MAIN y { TEST(3)+y } ;
