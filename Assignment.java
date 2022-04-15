@@ -3,16 +3,25 @@
     public static void main(String args []) throws Exception {
       try {
         new Assignment(System.in).Program();
-        System.out.println("Syntax is okay");
+        System.out.println("Syntax is okay: PASS");
       } catch (Exception e) {
-        System.out.println("Syntax failure: " + e.getMessage());
+        System.out.println("Syntax failure HERE: " + e.getMessage());
       }
     }
 
 //Lexical Specification
 
-//Program consists of the main function and a series of function definitions
-//Program -> Main Function | Function Definition
+//(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
+//(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
+//(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
+//(10) - [CORRECT]  //(11) - [INCORRECT]  //(12) - [CORRECT]
+
+//TODO: (7) - Make sure associated parameters are used in function bodies
+//TODO: (8) - Make sure function calls refer to defined functions in the same file
+//TODO: (11) - Make sure functions can only be defined once in the same file
+
+//Program consists of one main function and a series of function definitions in any order
+//Program -> Function* Main Function*
   final public void Program() throws ParseException {
     label_1:
     while (true) {
@@ -24,8 +33,18 @@
       jj_consume_token(DEFINE);
       Function();
     }
-    jj_consume_token(DEFINE);
-    Main();
+    try {
+      jj_consume_token(DEFINE);
+      Main();
+    } catch (ParseException e) {
+                               //Catch error thrown for missing main function
+    int lineNumber = 0;
+
+    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    System.err.println("Missing Main Function");
+
+    System.exit(0);
+    }
     label_2:
     while (true) {
       if (jj_2_2(2)) {
@@ -39,9 +58,7 @@
     jj_consume_token(0);
   }
 
-//(<DEFINE> (Function))* (<DEFINE> Main()) (<DEFINE> (Function))* <EOF>
-
-//Main -> DEF MAIN FUNFunctionBody
+//Main -> MAIN FunctionBody
   final public void Main() throws ParseException {
     jj_consume_token(MAIN);
     jj_consume_token(SPACE);
@@ -66,7 +83,17 @@
     jj_consume_token(RBRACE);
     jj_consume_token(SPACE);
     jj_consume_token(SCOLON);
-    jj_consume_token(EOL);
+    try {
+      jj_consume_token(EOL);
+    } catch (ParseException e) {
+                               //Catch error thrown for wrong line terminator
+    int lineNumber = e.getMessage().indexOf("line") + 5;
+
+    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    System.err.println("Invalid line terminator");
+
+    System.exit(0);
+    }
   }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
@@ -110,11 +137,11 @@
 //FACTOR -> NUM | Function | Parameter
   final public void Factor() throws ParseException {
     if (jj_2_5(2)) {
-      jj_consume_token(NUM);
-    } else if (jj_2_6(2)) {
       Function_Call();
-    } else if (jj_2_7(2)) {
+    } else if (jj_2_6(2)) {
       jj_consume_token(PARAM);
+    } else if (jj_2_7(2)) {
+      jj_consume_token(NUM);
     } else {
       jj_consume_token(-1);
       throw new ParseException();
@@ -170,26 +197,20 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_2() {
+  private boolean jj_3_1() {
     if (jj_scan_token(DEFINE)) return true;
     if (jj_3R_5()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_scan_token(FUNC)) return true;
     return false;
   }
 
   private boolean jj_3R_8() {
     if (jj_scan_token(FUNC)) return true;
     if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_scan_token(DEFINE)) return true;
-    if (jj_3R_5()) return true;
     return false;
   }
 
@@ -200,7 +221,13 @@
   }
 
   private boolean jj_3_7() {
-    if (jj_scan_token(PARAM)) return true;
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_scan_token(DEFINE)) return true;
+    if (jj_3R_5()) return true;
     return false;
   }
 
@@ -218,7 +245,7 @@
   }
 
   private boolean jj_3_5() {
-    if (jj_scan_token(NUM)) return true;
+    if (jj_3R_8()) return true;
     return false;
   }
 
@@ -228,13 +255,13 @@
     return false;
   }
 
-  private boolean jj_3R_5() {
-    if (jj_scan_token(FUNC)) return true;
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
     return false;
   }
 
-  private boolean jj_3R_6() {
-    if (jj_3R_7()) return true;
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 

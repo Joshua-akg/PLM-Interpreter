@@ -1,4 +1,3 @@
-//set lookahead to 2
 options{
   lookahead = 2;
   STATIC = false;
@@ -9,9 +8,9 @@ PARSER_BEGIN(Assignment)
     public static void main(String args []) throws Exception {
       try {
         new Assignment(System.in).Program();
-        System.out.println("Syntax is okay");
+        System.out.println("Syntax is okay: PASS");
       } catch (Exception e) {
-        System.out.println("Syntax failure: " + e.getMessage());
+        System.out.println("Syntax failure HERE: " + e.getMessage());
       }     
     }
   }
@@ -50,18 +49,36 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
 //Lexical Specification
 
-//Program consists of the main function and a series of function definitions
-//Program -> Main Function | Function Definition
+//(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
+//(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
+//(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
+//(10) - [CORRECT]  //(11) - [INCORRECT]  //(12) - [CORRECT]
+
+//TODO: (7) - Make sure associated parameters are used in function bodies
+//TODO: (8) - Make sure function calls refer to defined functions in the same file
+//TODO: (11) - Make sure functions can only be defined once in the same file
+
+//Program consists of one main function and a series of function definitions in any order
+//Program -> Function* Main Function*
 void Program(): {} {
   (<DEFINE> Function())* 
-  <DEFINE> Main()
+  
+  try {
+    <DEFINE> Main()
+  } catch (ParseException e) { //Catch error thrown for missing main function
+    int lineNumber = 0;
+
+    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    System.err.println("Missing Main Function");
+
+    System.exit(0);
+  }
+
   (<DEFINE> Function())*
   <EOF>  
 }
 
-//(<DEFINE> (Function))* (<DEFINE> Main()) (<DEFINE> (Function))* <EOF>
-
-//Main -> DEF MAIN FUNFunctionBody
+//Main -> MAIN FunctionBody
 void Main(): {} {
   <MAIN> <SPACE> FunctionBody()
 }
@@ -73,7 +90,17 @@ void Function(): {} {
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
 void FunctionBody(): {} {
-  <LBRACE> <SPACE> (Expression()) <SPACE> <RBRACE> <SPACE> <SCOLON> <EOL>
+  <LBRACE> <SPACE> (Expression()) <SPACE> <RBRACE> <SPACE> <SCOLON> 
+  try {
+    <EOL>
+  } catch (ParseException e) { //Catch error thrown for wrong line terminator
+    int lineNumber = e.getMessage().indexOf("line") + 5;
+
+    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    System.err.println("Invalid line terminator");
+
+    System.exit(0);
+  }
 }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
@@ -93,5 +120,5 @@ void Term(): {} {
 
 //FACTOR -> NUM | Function | Parameter
 void Factor(): {} {
-  <NUM> | Function_Call() | <PARAM>
+  Function_Call() | <PARAM> | <NUM>
 }
