@@ -5,6 +5,9 @@ options{
 
 PARSER_BEGIN(Assignment)
   public class Assignment{
+    public static ArrayList<String> functionCalls = new ArrayList<String>();
+    public static ArrayList<String> functionNames = new ArrayList<String>();
+
     public static void main(String args []) throws Exception {
       try {
         new Assignment(System.in).Program();
@@ -54,8 +57,8 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 //(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
 //(10) - [CORRECT]  //(11) - [INCORRECT]  //(12) - [CORRECT]
 
-//TODO: (7) - Make sure associated parameters are used in function bodies
-//TODO: (8) - Make sure function calls refer to defined functions in the same file
+//TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
+//TODO: (8) - Make sure function calls refer to defined functions in the same file #
 //TODO: (11) - Make sure functions can only be defined once in the same file
 
 //Program consists of one main function and a series of function definitions in any order
@@ -63,18 +66,18 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 void Program(): {} {
   (<DEFINE> Function())* 
   
+  <DEFINE>
   try {
-    <DEFINE> Main()
+    Main()
   } catch (ParseException e) { //Catch error thrown for missing main function
     int lineNumber = 0;
-
-    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+    System.err.println(lineNumber);
     System.err.println("Missing Main Function");
-
     System.exit(0);
   }
 
   (<DEFINE> Function())*
+  
   <EOF>  
 }
 
@@ -85,12 +88,32 @@ void Main(): {} {
 
 //Function -> FUNC PARAM FunctionBody
 void Function(): {} {
-  <FUNC> <SPACE> <PARAM> <SPACE> FunctionBody()
+  try {
+    <FUNC> <SPACE> <PARAM> <SPACE> FunctionBody()
+  } catch (ParseException e) { //Catch error thrown for missing function name
+    int lineNumber = e.getMessage().indexOf("line") + 5;
+    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+
+    System.err.println("Incorrect Function Format");
+    System.exit(0);
+  }
 }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
 void FunctionBody(): {} {
-  <LBRACE> <SPACE> (Expression()) <SPACE> <RBRACE> <SPACE> <SCOLON> 
+  <LBRACE> <SPACE> 
+  
+  try {
+    Expression()
+  } catch (ParseException e) { //Catch error thrown for wrong expression
+    int lineNumber = e.getMessage().indexOf("line") + 5;
+    System.err.println(e.getMessage().substring(lineNumber,lineNumber+1));
+
+    System.err.println("Incorrect Expression Format");
+    System.exit(0);}  
+  
+  <SPACE> <RBRACE> <SPACE> <SCOLON> 
+  
   try {
     <EOL>
   } catch (ParseException e) { //Catch error thrown for wrong line terminator
@@ -119,6 +142,7 @@ void Term(): {} {
 }
 
 //FACTOR -> NUM | Function | Parameter
+//add check to make sure function calls refer to defined functions in the same file
 void Factor(): {} {
   Function_Call() | <PARAM> | <NUM>
 }
