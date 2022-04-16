@@ -94,7 +94,7 @@ void Program(): {Token t;} {
     {
     //check if the all functionCalls are in the functionNames list
       for (String call : Assignment.functionCalls) {
-        if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")))) {
+        if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")+1))) {
           String lineNumber = call.substring(0, call.indexOf(" "));
           throw new ParseException(lineNumber+"\nWrong call to an undefined function");
         }
@@ -122,6 +122,9 @@ void Program(): {Token t;} {
 void Main(): {} {
   try {
     <MAIN>
+    {
+      Assignment.functionNames.add("MAIN");
+    }
   } catch (ParseException e) { //Catch error thrown for missing main function
     //get current line number
     String temp = e.getMessage().substring(
@@ -156,12 +159,13 @@ void Function():
 { String functionName = "";
   Token t;} 
 {
+  
   try {
     t = <FUNC> 
     { //Check if a function with the same name has already been defined
       functionName = t.image;
       if (functionNames.contains(functionName)) {
-        throw new ParseException(t.beginLine+"\nWrong Function Definition" + functionName + " already defined");
+        throw new ParseException(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");
       } else {
         functionNames.add(functionName);
       }
@@ -201,7 +205,7 @@ void FunctionBody(): {} {
     );
     int lineNumber = Integer.parseInt(tem);
 
-    throw new ParseException(lineNumber+"Wrong Expression Format");
+    throw new ParseException(lineNumber+"Wrong Function Body Format");
   }  
   <SPACE> <RBRACE> <SPACE> <SCOLON> 
 
