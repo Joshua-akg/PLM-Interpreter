@@ -12,15 +12,26 @@ PARSER_BEGIN(Assignment)
     //Maps function names to their parameters
     public static HashMap<String, Character> functionParams = new HashMap<String, Character>();
 
-    public static void main(String args []) throws Exception {
+    public static void main(String args []) throws Throwable {
       try {
         new Assignment(System.in).Program();
         System.out.println("Syntax is okay: PASS");
-      } catch (Exception e) {
+      } catch (Throwable e) {
         System.out.println("Syntax error detected: FAIL");
-        System.err.println(e.getMessage());
+
+        //check if e is an instance of error
+        if (e instanceof Error) {
+          System.err.println(getLineNumber(e.getMessage())+"\nNon-Token character found");
+        } else 
+            System.err.println(e.getMessage());
         // e.printStackTrace();
-      }     
+      }  
+    }
+    //add function to calculate line number
+
+    public static int getLineNumber(String exceptionMessage) {
+      String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
+      return Integer.parseInt(temp);
     }
   }
 PARSER_END(Assignment)
@@ -57,18 +68,12 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
 //Lexical Specification
 
-void Definition(): {} {
+void Definition() throws Exception: {} {
   try {
     <DEFINE>
   } catch (Exception e) { //Catch error thrown for wrong expression
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
     //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nEach Function must start with (DEF)");
+    throw new Exception(getLineNumber(e.getMessage())+"\nEach Function must start with (DEF)");
   }
 }
 
@@ -82,7 +87,7 @@ void Definition(): {} {
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
-void Program(): {Token t;} {
+void Program() throws Exception: {Token t;} {
   (Definition() Function())* 
   
   Definition() Main()
@@ -106,10 +111,7 @@ void Program(): {Token t;} {
       throw e;
 
     //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     if (e.getMessage().contains("MAIN")) {
       throw new Exception(lineNumber+"\nDuplicate Main Function");
@@ -120,7 +122,7 @@ void Program(): {Token t;} {
 }
 
 //Main -> MAIN FunctionBody
-void Main(): {} {
+void Main() throws Exception: {} {
   try {
     <MAIN>
     {
@@ -128,10 +130,7 @@ void Main(): {} {
     }
   } catch (Exception e) { //Catch error thrown for missing main function
     //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
     if (e.getMessage().contains("DEF")) {
       throw new Exception(lineNumber+"\nWrong DEF Function Format - Function cannot be called DEF");
     }
@@ -147,16 +146,13 @@ void Main(): {} {
       throw e;
 
     //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
     throw new Exception(lineNumber+"\nWrong Main Function Format"); 
   }
 }
 
 //Function -> FUNC PARAM FunctionBody
-void Function():
+void Function() throws Exception:
 { String functionName = "";
   Token t;} 
 {
@@ -172,17 +168,13 @@ void Function():
       }
     } 
     <SPACE> <PARAM> FunctionBody()
-  } catch (Exception e) { 
+  } catch (Exception e) { //Catch error thrown for missing function name
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
     
-    //Catch error thrown for missing function name
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw message saying the parameter format is wrong
     if (e.getMessage().contains("PARAM"))
@@ -194,7 +186,7 @@ void Function():
 }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
-void FunctionBody(): {} {
+void FunctionBody() throws Exception: {} {
   try {
   <SPACE> <LBRACE> <SPACE> Expression() <SPACE> <RBRACE> <SPACE>
   } catch (Exception e) { //Catch error thrown for wrong expression
@@ -235,7 +227,7 @@ void FunctionBody(): {} {
 }
 
 //EXPR -> TERM ADD TERM | TERM
-void Expression(): {} {
+void Expression() throws Exception: {} {
   try {
     Term() ( <ADD> Term() )*
   } catch (Exception e) {
@@ -244,10 +236,7 @@ void Expression(): {} {
     }
 
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
     throw new Exception(lineNumber+"\nWrong Expression Format");
@@ -255,7 +244,7 @@ void Expression(): {} {
 }
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
-void Term(): {} {
+void Term() throws Exception: {} {
   try {
     Factor() ( <MUL> Factor() )*
   } catch (Exception e) {
@@ -264,10 +253,7 @@ void Term(): {} {
     }
 
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
     throw new Exception(lineNumber+"\nWrong Expression Format");
@@ -276,7 +262,7 @@ void Term(): {} {
 
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
-void Factor(): {} {
+void Factor() throws Exception: {} {
   try {
     Function_Call() | <PARAM> | <NUM>
   } catch (Exception e) {
@@ -284,10 +270,7 @@ void Factor(): {} {
       throw e;
     else {
       //extract line number from Exception
-      String temp = e.getMessage().substring(
-        e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-      );
-      int lineNumber = Integer.parseInt(temp);
+      int lineNumber = getLineNumber(e.getMessage());
 
       //throw new excpetion with a custom message
       throw new Exception(lineNumber+"\nWrong Expression Format");
@@ -296,7 +279,7 @@ void Factor(): {} {
 }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
-void Function_Call():
+void Function_Call() throws Exception:
 {Token t;}
 {
   try {
@@ -312,10 +295,7 @@ void Function_Call():
     }
     
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
     throw new Exception(lineNumber+"\nWrong Function Call Format");

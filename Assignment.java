@@ -7,31 +7,36 @@
     //Maps function names to their parameters
     public static HashMap<String, Character> functionParams = new HashMap<String, Character>();
 
-    public static void main(String args []) throws Exception {
+    public static void main(String args []) throws Throwable {
       try {
         new Assignment(System.in).Program();
         System.out.println("Syntax is okay: PASS");
-      } catch (Exception e) {
+      } catch (Throwable e) {
         System.out.println("Syntax error detected: FAIL");
-        System.err.println(e.getMessage());
+
+        //check if e is an instance of error
+        if (e instanceof Error) {
+          System.err.println(getLineNumber(e.getMessage())+"\nNon-Token character found");
+        } else
+            System.err.println(e.getMessage());
         // e.printStackTrace();
       }
     }
+    //add function to calculate line number
+
+    public static int getLineNumber(String exceptionMessage) {
+      String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
+      return Integer.parseInt(temp);
+    }
 
 //Lexical Specification
-  final public void Definition() throws ParseException {
+  final public void Definition() throws ParseException, Exception {
     try {
       jj_consume_token(DEFINE);
-    } catch (ParseException e) {
-                               //Catch error thrown for wrong expression
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
+    } catch (Exception e) {
+                          //Catch error thrown for wrong expression
     //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nEach Function must start with (DEF)");}
+    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nEach Function must start with (DEF)");}
     }
   }
 
@@ -45,8 +50,8 @@
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
-  final public void Program() throws ParseException {
-                 Token t;
+  final public void Program() throws ParseException, Exception {
+                                  Token t;
     label_1:
     while (true) {
       if (jj_2_1(2)) {
@@ -75,65 +80,56 @@
       for (String call : Assignment.functionCalls) {
         if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")+1))) {
           String lineNumber = call.substring(0, call.indexOf(" "));
-          {if (true) throw new ParseException(lineNumber+"\nWrong call to an undefined function");}
+          {if (true) throw new Exception(lineNumber+"\nWrong call to an undefined function");}
         }
       }
-    } catch (ParseException e) {
-                               //Catch error thrown for duplicate main
+    } catch (Exception e) {
+                          //Catch error thrown for duplicate main
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
     //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     if (e.getMessage().contains("MAIN")) {
-      {if (true) throw new ParseException(lineNumber+"\nDuplicate Main Function");}
+      {if (true) throw new Exception(lineNumber+"\nDuplicate Main Function");}
     }
 
-    {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Format");}
     }
   }
 
 //Main -> MAIN FunctionBody
-  final public void Main() throws ParseException {
+  final public void Main() throws ParseException, Exception {
     try {
       jj_consume_token(MAIN);
       Assignment.functionNames.add("MAIN");
-    } catch (ParseException e) {
-                               //Catch error thrown for missing main function
+    } catch (Exception e) {
+                          //Catch error thrown for missing main function
     //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
     if (e.getMessage().contains("DEF")) {
-      {if (true) throw new ParseException(lineNumber+"\nWrong DEF Function Format - Function cannot be called DEF");}
+      {if (true) throw new Exception(lineNumber+"\nWrong DEF Function Format - Function cannot be called DEF");}
     }
 
     lineNumber = 0;
-    {if (true) throw new ParseException(lineNumber+"\nMissing Main Function");}
+    {if (true) throw new Exception(lineNumber+"\nMissing Main Function");}
     }
     try {
       FunctionBody();
-    } catch (ParseException e) {
-                               //Catch error thrown for incorrect main function Format
+    } catch (Exception e) {
+                          //Catch error thrown for incorrect main function Format
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
     //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-    {if (true) throw new ParseException(lineNumber+"\nWrong Main Function Format");}
+    int lineNumber = getLineNumber(e.getMessage());
+    {if (true) throw new Exception(lineNumber+"\nWrong Main Function Format");}
     }
   }
 
 //Function -> FUNC PARAM FunctionBody
-  final public void Function() throws ParseException {
+  final public void Function() throws ParseException, Exception {
   String functionName = "";
   Token t;
     try {
@@ -141,36 +137,33 @@
       //Check if a function with the same name has already been defined
       functionName = t.image;
       if (functionNames.contains(functionName)) {
-        {if (true) throw new ParseException(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");}
+        {if (true) throw new Exception(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");}
       } else {
         functionNames.add(functionName);
       }
       jj_consume_token(SPACE);
       jj_consume_token(PARAM);
       FunctionBody();
-    } catch (ParseException e) {
+    } catch (Exception e) {
+                          //Catch error thrown for missing function name
     if (e.getMessage().contains("Wrong")) {
       {if (true) throw e;}
     }
 
-    //Catch error thrown for missing function name
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw message saying the parameter format is wrong
     if (e.getMessage().contains("PARAM"))
-      {if (true) throw new ParseException(lineNumber+"\nWrong Parameter Format");}
+      {if (true) throw new Exception(lineNumber+"\nWrong Parameter Format");}
 
     //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Format");}
     }
   }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
-  final public void FunctionBody() throws ParseException {
+  final public void FunctionBody() throws ParseException, Exception {
     try {
       jj_consume_token(SPACE);
       jj_consume_token(LBRACE);
@@ -179,8 +172,8 @@
       jj_consume_token(SPACE);
       jj_consume_token(RBRACE);
       jj_consume_token(SPACE);
-    } catch (ParseException e) {
-                               //Catch error thrown for wrong expression
+    } catch (Exception e) {
+                          //Catch error thrown for wrong expression
     //extract line number from Exception
 
     if (e.getMessage().contains("Wrong"))
@@ -194,15 +187,15 @@
     //throw new exception with custom message
     // if (e.getMessage().contains("PARAM"))
     // System.out.println(e.getMessage());
-    //   throw new ParseException(lineNumber+"\nWrong Parameter Foormat"); //what does this fix?
+    //   throw new Exception(lineNumber+"\nWrong Parameter Foormat"); //what does this fix?
 
-    {if (true) throw new ParseException(lineNumber+"\nWrong Function Body Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Body Format");}
     }
     jj_consume_token(SCOLON);
     try {
       jj_consume_token(EOL);
-    } catch (ParseException e) {
-                               //Catch error thrown for wrong line terminator
+    } catch (Exception e) {
+                          //Catch error thrown for wrong line terminator
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
@@ -213,12 +206,12 @@
     int lineNumber = Integer.parseInt(tem);
 
     //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"Invalid line terminator");}
+    {if (true) throw new Exception(lineNumber+"Invalid line terminator");}
     }
   }
 
 //EXPR -> TERM ADD TERM | TERM
-  final public void Expression() throws ParseException {
+  final public void Expression() throws ParseException, Exception {
     try {
       Term();
       label_3:
@@ -237,18 +230,15 @@
     }
 
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Expression Format");}
     }
   }
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
-  final public void Term() throws ParseException {
+  final public void Term() throws ParseException, Exception {
     try {
       Factor();
       label_4:
@@ -261,25 +251,22 @@
         jj_consume_token(MUL);
         Factor();
       }
-    } catch (ParseException e) {
+    } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       {if (true) throw e;}
     }
 
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Expression Format");}
     }
   }
 
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
-  final public void Factor() throws ParseException {
+  final public void Factor() throws ParseException, Exception {
     try {
       if (jj_2_5(2)) {
         Function_Call();
@@ -291,24 +278,21 @@
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (ParseException e) {
+    } catch (Exception e) {
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
     else {
       //extract line number from Exception
-      String temp = e.getMessage().substring(
-        e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-      );
-      int lineNumber = Integer.parseInt(temp);
+      int lineNumber = getLineNumber(e.getMessage());
 
       //throw new excpetion with a custom message
-      {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
+      {if (true) throw new Exception(lineNumber+"\nWrong Expression Format");}
     }
     }
   }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
-  final public void Function_Call() throws ParseException {
+  final public void Function_Call() throws ParseException, Exception {
  Token t;
     try {
       t = jj_consume_token(FUNC);
@@ -317,20 +301,17 @@
       jj_consume_token(LPAREN);
       Expression();
       jj_consume_token(RPAREN);
-    } catch (ParseException e) {
-                               //catch error thrown for incorrect function call Format
+    } catch (Exception e) {
+                          //catch error thrown for incorrect function call Format
     if (e.getMessage().contains("Wrong")) {
       {if (true) throw e;}
     }
 
     //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Function Call Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Call Format");}
     }
   }
 
@@ -383,29 +364,13 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
+  private boolean jj_3R_7() {
+    if (jj_3R_8()) return true;
     return false;
   }
 
   private boolean jj_3_5() {
     if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_7() {
-    if (jj_3R_8()) return true;
     return false;
   }
 
@@ -422,19 +387,26 @@
     return false;
   }
 
+  private boolean jj_3_3() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
+    return false;
+  }
+
   private boolean jj_3R_9() {
     if (jj_scan_token(FUNC)) return true;
     if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
+  private boolean jj_3_4() {
+    if (jj_scan_token(MUL)) return true;
+    if (jj_3R_8()) return true;
     return false;
   }
 
@@ -444,15 +416,24 @@
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_7()) return true;
+  private boolean jj_3R_5() {
+    if (jj_scan_token(DEFINE)) return true;
     return false;
   }
 
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
-    if (jj_3R_8()) return true;
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
     return false;
   }
 
