@@ -77,14 +77,6 @@ void Definition() throws Exception: {} {
   }
 }
 
-//(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
-//(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
-//(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
-//(10) - [CORRECT]  //(11) - [CORRECT]  //(12) - [CORRECT]
-
-//TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
-//TODO: (8) - Make sure function calls refer to defined functions in the same file #
-
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
 void Program() throws Exception: {Token t;} {
@@ -132,7 +124,7 @@ void Main() throws Exception: {} {
     //get current line number
     int lineNumber = getLineNumber(e.getMessage());
     if (e.getMessage().contains("DEF")) {
-      throw new Exception(lineNumber+"\nWrong DEF Function Format - Function cannot be called DEF");
+      throw new Exception(lineNumber+"\nWrong Format - Function cannot be called DEF");
     }
 
     lineNumber = 0;
@@ -195,10 +187,7 @@ void FunctionBody() throws Exception: {} {
     if (e.getMessage().contains("Wrong"))
       throw e;
 
-    String tem = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(tem);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new exception with custom message
     // if (e.getMessage().contains("PARAM"))
@@ -214,12 +203,8 @@ void FunctionBody() throws Exception: {} {
   } catch (Exception e) { //Catch error thrown for wrong line terminator
     if (e.getMessage().contains("Wrong"))
       throw e;
-
-    String tem = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
     
-    int lineNumber = Integer.parseInt(tem);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
     throw new Exception(lineNumber+"Invalid line terminator");

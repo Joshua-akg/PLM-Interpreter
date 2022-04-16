@@ -1,1 +1,2 @@
 DEF test x { x+3 } ;
+DEF MAIN { x+3 } ;

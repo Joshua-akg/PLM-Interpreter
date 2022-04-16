@@ -109,7 +109,7 @@
     //get current line number
     int lineNumber = getLineNumber(e.getMessage());
     if (e.getMessage().contains("DEF")) {
-      {if (true) throw new Exception(lineNumber+"\nWrong DEF Function Format - Function cannot be called DEF");}
+      {if (true) throw new Exception(lineNumber+"\nWrong Format - Function cannot be called DEF");}
     }
 
     lineNumber = 0;
