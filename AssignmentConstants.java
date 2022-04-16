@@ -36,8 +36,6 @@ public interface AssignmentConstants {
   int PARAM = 13;
   /** RegularExpression Id. */
   int NUM = 14;
-  /** RegularExpression Id. */
-  int DEFINE = 15;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -59,7 +57,6 @@ public interface AssignmentConstants {
     "<FUNC>",
     "<PARAM>",
     "<NUM>",
-    "<DEFINE>",
   };
 
 }

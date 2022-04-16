@@ -1,5 +1,5 @@
 options{
-  lookahead = 2;
+  // lookahead = 2;
   STATIC = false;
 }
 
@@ -14,7 +14,7 @@ PARSER_BEGIN(Assignment)
 
     public static void main(String args []) throws Exception {
       try {
-        new Assignment(System.in).Program();
+        new Assignment(System.in).Start();
         System.out.println("Syntax is okay: PASS");
       } catch (Exception e) {
         System.out.println("Syntax error detected: FAIL");
@@ -54,25 +54,30 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
 //Lexical Specification
 
-//(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
-//(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
-//(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
-//(10) - [CORRECT]  //(11) - [CORRECT]  //(12) - [CORRECT]
+void Start(): {} {
+  Program() <EOF>
+  {
+    //check for one main function
+    if (!function.contains("MAIN")) {
+      throw new ParseException("0. No Main Function");
+    }
 
-//TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
-//TODO: (8) - Make sure function calls refer to defined functions in the same file #
-
-void Definition(): {} {
-  try {
-    <DEFINE>
-  } catch (ParseException e) { //Catch error thrown for wrong beginning of line
-    
+    // check for each call goes to a defined function
+    for (String function : functionCalls) {
+      if (!functionNames.contains(function)) {
+        throw new ParseException("Function has not been defined: " + function);
+      }
+    }
   }
 }
 
-void Start(): {} {
-  Program() <EOF>
-  //{}
+void Definition(): {} {
+  try {
+    <DEF> <SPACE>
+  } catch (ParseException e) {//Catch error thrown for wrong beginning of line
+    //get line number and then throw error
+    System.out.println("Error: Wrong start to the line");  
+  }
 }
 
 //Program -> (Function() | Main())*

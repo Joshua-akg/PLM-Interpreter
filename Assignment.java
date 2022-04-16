@@ -9,31 +9,17 @@
 
     public static void main(String args []) throws Exception {
       try {
-        new Assignment(System.in).Program();
+        new Assignment(System.in).Start();
         System.out.println("Syntax is okay: PASS");
       } catch (Exception e) {
         System.out.println("Syntax error detected: FAIL");
         System.err.println(e.getMessage());
-        // e.printStackTrace();
       }
     }
 
-//Lexical Specification
-  final public void Definition() throws ParseException {
-    try {
-      jj_consume_token(DEFINE);
-    } catch (ParseException e) {
-                               //Catch error thrown for wrong expression
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
+// TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
-    //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nEach Function must start with (DEF)");}
-    }
-  }
+//Lexical Specification
 
 //(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
 //(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
@@ -42,126 +28,63 @@
 
 //TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
 //TODO: (8) - Make sure function calls refer to defined functions in the same file #
+  final public void Definition() throws ParseException {
+    try {
+      jj_consume_token(DEF);
+      jj_consume_token(SPACE);
+    } catch (ParseException e) {
+                               //Catch error thrown for wrong beginning of line
+    //get line number and then throw error
+    // int lineNumber = e.getStackTrace()[0].getLineNumber();
+    System.out.println("Error: ");
+    }
+  }
 
-//Program consists of one main function and a series of function definitions in any order
-//Program -> Function* Main Function*
+  final public void Start() throws ParseException {
+    Program();
+    jj_consume_token(0);
+  }
+
+//Program -> (Function() | Main())*
   final public void Program() throws ParseException {
-                 Token t;
     label_1:
     while (true) {
-      if (jj_2_1(2)) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case DEF:
         ;
-      } else {
+        break;
+      default:
+        jj_la1[0] = jj_gen;
         break label_1;
       }
       Definition();
-      Function();
-    }
-    Definition();
-    Main();
-    try {
-      label_2:
-      while (true) {
-        if (jj_2_2(2)) {
-          ;
-        } else {
-          break label_2;
-        }
-        Definition();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case FUNC:
         Function();
+        break;
+      case MAIN:
+        Main();
+        break;
+      default:
+        jj_la1[1] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-      jj_consume_token(0);
-    //check if the all functionCalls are in the functionNames list
-      for (String call : Assignment.functionCalls) {
-        if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")+1))) {
-          String lineNumber = call.substring(0, call.indexOf(" "));
-          {if (true) throw new ParseException(lineNumber+"\nWrong call to an undefined function");}
-        }
-      }
-    } catch (ParseException e) {
-                               //Catch error thrown for duplicate main
-    if (e.getMessage().contains("Wrong"))
-      {if (true) throw e;}
-
-    //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
-    if (e.getMessage().contains("MAIN")) {
-      {if (true) throw new ParseException(lineNumber+"\nDuplicate Main Function");}
-    }
-    {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
     }
   }
 
 //Main -> MAIN FunctionBody
   final public void Main() throws ParseException {
-    try {
-      jj_consume_token(MAIN);
-      Assignment.functionNames.add("MAIN");
-    } catch (ParseException e) {
-                               //Catch error thrown for missing main function
-    //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-    if (e.getMessage().contains("DEF")) {
-      {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
-    }
-
-    lineNumber = 0;
-    {if (true) throw new ParseException(lineNumber+"\nMissing Main Function");}
-    }
-    try {
-      FunctionBody();
-    } catch (ParseException e) {
-                               //Catch error thrown for incorrect main function Format
-    if (e.getMessage().contains("Wrong"))
-      {if (true) throw e;}
-
-    //get current line number
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-    {if (true) throw new ParseException(lineNumber+"\nWrong Main Function Format");}
-    }
+    jj_consume_token(MAIN);
+    FunctionBody();
   }
 
 //Function -> FUNC PARAM FunctionBody
   final public void Function() throws ParseException {
-  String functionName = "";
-  Token t;
-    try {
-      t = jj_consume_token(FUNC);
-      //Check if a function with the same name has already been defined
-      functionName = t.image;
-      if (functionNames.contains(functionName)) {
-        {if (true) throw new ParseException(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");}
-      } else {
-        functionNames.add(functionName);
-      }
-      jj_consume_token(SPACE);
-      jj_consume_token(PARAM);
-      FunctionBody();
-    } catch (ParseException e) {
-    if (e.getMessage().contains("Wrong")) {
-      {if (true) throw e;}
-    }
-
-    //Catch error thrown for missing function name
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
-    //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
-    }
+    jj_consume_token(FUNC);
+    jj_consume_token(SPACE);
+    jj_consume_token(PARAM);
+    FunctionBody();
   }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
@@ -169,281 +92,75 @@
     jj_consume_token(SPACE);
     jj_consume_token(LBRACE);
     jj_consume_token(SPACE);
-    try {
-      Expression();
-    } catch (ParseException e) {
-                               //Catch error thrown for wrong expression
-    //extract line number from Exception
-
-    if (e.getMessage().contains("Wrong"))
-      {if (true) throw e;}
-
-    String tem = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(tem);
-
-    {if (true) throw new ParseException(lineNumber+"Wrong Function Body Format");}
-    }
+    Expression();
     jj_consume_token(SPACE);
     jj_consume_token(RBRACE);
     jj_consume_token(SPACE);
     jj_consume_token(SCOLON);
-    try {
-      jj_consume_token(EOL);
-    } catch (ParseException e) {
-                               //Catch error thrown for wrong line terminator
-    if (e.getMessage().contains("Wrong"))
-      {if (true) throw e;}
-
-    String tem = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-
-    int lineNumber = Integer.parseInt(tem);
-
-    //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"Invalid line terminator");}
-    }
+    jj_consume_token(EOL);
   }
 
 //EXPR -> TERM ADD TERM | TERM
   final public void Expression() throws ParseException {
-    try {
-      Term();
-      label_3:
-      while (true) {
-        if (jj_2_3(2)) {
-          ;
-        } else {
-          break label_3;
-        }
-        jj_consume_token(ADD);
-        Term();
+    Term();
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case ADD:
+        ;
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        break label_2;
       }
-    } catch (ParseException e) {
-    if (e.getMessage().contains("Wrong")) {
-      {if (true) throw e;}
-    }
-
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
-    //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
+      jj_consume_token(ADD);
+      Term();
     }
   }
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
   final public void Term() throws ParseException {
-    try {
-      Factor();
-      label_4:
-      while (true) {
-        if (jj_2_4(2)) {
-          ;
-        } else {
-          break label_4;
-        }
-        jj_consume_token(MUL);
-        Factor();
+    Factor();
+    label_3:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case MUL:
+        ;
+        break;
+      default:
+        jj_la1[3] = jj_gen;
+        break label_3;
       }
-    } catch (ParseException e) {
-    if (e.getMessage().contains("Wrong")) {
-      {if (true) throw e;}
-    }
-
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
-    //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
+      jj_consume_token(MUL);
+      Factor();
     }
   }
 
 //FACTOR -> NUM | Function | Parameter
-//add check to make sure function calls refer to defined functions in the same file
   final public void Factor() throws ParseException {
-    try {
-      if (jj_2_5(2)) {
-        Function_Call();
-      } else if (jj_2_6(2)) {
-        jj_consume_token(PARAM);
-      } else if (jj_2_7(2)) {
-        jj_consume_token(NUM);
-      } else {
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-    } catch (ParseException e) {
-    if (e.getMessage().contains("Wrong"))
-      {if (true) throw e;}
-    else {
-      //extract line number from Exception
-      String temp = e.getMessage().substring(
-        e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-      );
-      int lineNumber = Integer.parseInt(temp);
-
-      //throw new excpetion with a custom message
-      {if (true) throw new ParseException(lineNumber+"\nWrong Expression Format");}
-    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case FUNC:
+      Function_Call();
+      break;
+    case PARAM:
+      jj_consume_token(PARAM);
+      break;
+    case NUM:
+      jj_consume_token(NUM);
+      break;
+    default:
+      jj_la1[4] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
   }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
   final public void Function_Call() throws ParseException {
- Token t;
-    try {
-      t = jj_consume_token(FUNC);
-      //add to arraylist of function calls
-      functionCalls.add(t.beginLine + " " + t.image);
-      jj_consume_token(LPAREN);
-      Expression();
-      jj_consume_token(RPAREN);
-    } catch (ParseException e) {
-                               //catch error thrown for incorrect function call Format
-    if (e.getMessage().contains("Wrong")) {
-      {if (true) throw e;}
-    }
-
-    //extract line number from Exception
-    String temp = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(temp);
-
-    //throw new excpetion with a custom message
-    {if (true) throw new ParseException(lineNumber+"\nWrong Function Call Format");}
-    }
-  }
-
-  private boolean jj_2_1(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_1(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(0, xla); }
-  }
-
-  private boolean jj_2_2(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_2(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(1, xla); }
-  }
-
-  private boolean jj_2_3(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_3(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(2, xla); }
-  }
-
-  private boolean jj_2_4(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_4(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(3, xla); }
-  }
-
-  private boolean jj_2_5(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_5(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(4, xla); }
-  }
-
-  private boolean jj_2_6(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_6(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(5, xla); }
-  }
-
-  private boolean jj_2_7(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_7(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(6, xla); }
-  }
-
-  private boolean jj_3R_8() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_5()) {
-    jj_scanpos = xsp;
-    if (jj_3_6()) {
-    jj_scanpos = xsp;
-    if (jj_3_7()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_7() {
-    if (jj_3R_8()) return true;
-    return false;
+    jj_consume_token(FUNC);
+    jj_consume_token(LPAREN);
+    Expression();
+    jj_consume_token(RPAREN);
   }
 
   /** Generated Token Manager. */
@@ -454,23 +171,15 @@
   /** Next token. */
   public Token jj_nt;
   private int jj_ntk;
-  private Token jj_scanpos, jj_lastpos;
-  private int jj_la;
-  /** Whether we are looking ahead. */
-  private boolean jj_lookingAhead = false;
-  private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[0];
+  final private int[] jj_la1 = new int[5];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {};
+      jj_la1_0 = new int[] {0x400,0x1800,0x8,0x10,0x7000,};
    }
-  final private JJCalls[] jj_2_rtns = new JJCalls[7];
-  private boolean jj_rescan = false;
-  private int jj_gc = 0;
 
   /** Constructor with InputStream. */
   public Assignment(java.io.InputStream stream) {
@@ -483,8 +192,7 @@
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
-    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -498,8 +206,7 @@
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
-    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -509,8 +216,7 @@
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
-    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -520,8 +226,7 @@
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
-    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -530,8 +235,7 @@
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
-    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -540,8 +244,7 @@
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 0; i++) jj_la1[i] = -1;
-    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -551,44 +254,11 @@
     jj_ntk = -1;
     if (token.kind == kind) {
       jj_gen++;
-      if (++jj_gc > 100) {
-        jj_gc = 0;
-        for (int i = 0; i < jj_2_rtns.length; i++) {
-          JJCalls c = jj_2_rtns[i];
-          while (c != null) {
-            if (c.gen < jj_gen) c.first = null;
-            c = c.next;
-          }
-        }
-      }
       return token;
     }
     token = oldToken;
     jj_kind = kind;
     throw generateParseException();
-  }
-
-  static private final class LookaheadSuccess extends java.lang.Error { }
-  final private LookaheadSuccess jj_ls = new LookaheadSuccess();
-  private boolean jj_scan_token(int kind) {
-    if (jj_scanpos == jj_lastpos) {
-      jj_la--;
-      if (jj_scanpos.next == null) {
-        jj_lastpos = jj_scanpos = jj_scanpos.next = token_source.getNextToken();
-      } else {
-        jj_lastpos = jj_scanpos = jj_scanpos.next;
-      }
-    } else {
-      jj_scanpos = jj_scanpos.next;
-    }
-    if (jj_rescan) {
-      int i = 0; Token tok = token;
-      while (tok != null && tok != jj_scanpos) { i++; tok = tok.next; }
-      if (tok != null) jj_add_error_token(kind, i);
-    }
-    if (jj_scanpos.kind != kind) return true;
-    if (jj_la == 0 && jj_scanpos == jj_lastpos) throw jj_ls;
-    return false;
   }
 
 
@@ -603,7 +273,7 @@
 
 /** Get the specific Token. */
   final public Token getToken(int index) {
-    Token t = jj_lookingAhead ? jj_scanpos : token;
+    Token t = token;
     for (int i = 0; i < index; i++) {
       if (t.next != null) t = t.next;
       else t = t.next = token_source.getNextToken();
@@ -621,46 +291,16 @@
   private java.util.List jj_expentries = new java.util.ArrayList();
   private int[] jj_expentry;
   private int jj_kind = -1;
-  private int[] jj_lasttokens = new int[100];
-  private int jj_endpos;
-
-  private void jj_add_error_token(int kind, int pos) {
-    if (pos >= 100) return;
-    if (pos == jj_endpos + 1) {
-      jj_lasttokens[jj_endpos++] = kind;
-    } else if (jj_endpos != 0) {
-      jj_expentry = new int[jj_endpos];
-      for (int i = 0; i < jj_endpos; i++) {
-        jj_expentry[i] = jj_lasttokens[i];
-      }
-      boolean exists = false;
-      for (java.util.Iterator it = jj_expentries.iterator(); it.hasNext();) {
-        int[] oldentry = (int[])(it.next());
-        if (oldentry.length == jj_expentry.length) {
-          exists = true;
-          for (int i = 0; i < jj_expentry.length; i++) {
-            if (oldentry[i] != jj_expentry[i]) {
-              exists = false;
-              break;
-            }
-          }
-          if (exists) break;
-        }
-      }
-      if (!exists) jj_expentries.add(jj_expentry);
-      if (pos != 0) jj_lasttokens[(jj_endpos = pos) - 1] = kind;
-    }
-  }
 
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[16];
+    boolean[] la1tokens = new boolean[15];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 0; i++) {
+    for (int i = 0; i < 5; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -669,16 +309,13 @@
         }
       }
     }
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 15; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
         jj_expentries.add(jj_expentry);
       }
     }
-    jj_endpos = 0;
-    jj_rescan_token();
-    jj_add_error_token(0, 0);
     int[][] exptokseq = new int[jj_expentries.size()][];
     for (int i = 0; i < jj_expentries.size(); i++) {
       exptokseq[i] = (int[])jj_expentries.get(i);
@@ -692,47 +329,6 @@
 
   /** Disable tracing. */
   final public void disable_tracing() {
-  }
-
-  private void jj_rescan_token() {
-    jj_rescan = true;
-    for (int i = 0; i < 7; i++) {
-    try {
-      JJCalls p = jj_2_rtns[i];
-      do {
-        if (p.gen > jj_gen) {
-          jj_la = p.arg; jj_lastpos = jj_scanpos = p.first;
-          switch (i) {
-            case 0: jj_3_1(); break;
-            case 1: jj_3_2(); break;
-            case 2: jj_3_3(); break;
-            case 3: jj_3_4(); break;
-            case 4: jj_3_5(); break;
-            case 5: jj_3_6(); break;
-            case 6: jj_3_7(); break;
-          }
-        }
-        p = p.next;
-      } while (p != null);
-      } catch(LookaheadSuccess ls) { }
-    }
-    jj_rescan = false;
-  }
-
-  private void jj_save(int index, int xla) {
-    JJCalls p = jj_2_rtns[index];
-    while (p.gen > jj_gen) {
-      if (p.next == null) { p = p.next = new JJCalls(); break; }
-      p = p.next;
-    }
-    p.gen = jj_gen + xla - jj_la; p.first = token; p.arg = xla;
-  }
-
-  static final class JJCalls {
-    int gen;
-    Token first;
-    int arg;
-    JJCalls next;
   }
 
   }
