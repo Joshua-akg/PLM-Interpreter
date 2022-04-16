@@ -4,6 +4,9 @@
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
 
+    //Maps function names to their parameters
+    public static HashMap<String, Character> functionParams = new HashMap<String, Character>();
+
     public static void main(String args []) throws Exception {
       try {
         new Assignment(System.in).Program();
@@ -39,7 +42,6 @@
 
 //TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
 //TODO: (8) - Make sure function calls refer to defined functions in the same file #
-//TODO: (11) - Handle error reporting for duplicate functions
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
@@ -69,6 +71,13 @@
         Function();
       }
       jj_consume_token(0);
+    //check if the all functionCalls are in the functionNames list
+      for (String call : Assignment.functionCalls) {
+        if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")))) {
+          String lineNumber = call.substring(0, call.indexOf(" "));
+          {if (true) throw new ParseException(lineNumber+"\nWrong call to an undefined function");}
+        }
+      }
     } catch (ParseException e) {
                                //Catch error thrown for duplicate main
     if (e.getMessage().contains("Wrong"))
@@ -150,7 +159,6 @@
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    // System.err.println(lineNumber+". Wrong Function Format");
     {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
     }
   }
@@ -293,9 +301,8 @@
  Token t;
     try {
       t = jj_consume_token(FUNC);
-      if (!functionNames.contains(t.image)) {
-        {if (true) throw new ParseException(t.beginLine+"\nWrong Function call. " + t.image + " not defined");}
-      }
+      //add to arraylist of function calls
+      functionCalls.add(t.beginLine + " " + t.image);
       jj_consume_token(LPAREN);
       Expression();
       jj_consume_token(RPAREN);
@@ -312,7 +319,6 @@
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    // System.out.println("INTERESTING!");
     {if (true) throw new ParseException(lineNumber+"\nWrong Function Call Format");}
     }
   }
@@ -372,21 +378,6 @@
     return false;
   }
 
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
   private boolean jj_3_5() {
     if (jj_3R_9()) return true;
     return false;
@@ -410,6 +401,11 @@
     return false;
   }
 
+  private boolean jj_3R_5() {
+    if (jj_scan_token(DEFINE)) return true;
+    return false;
+  }
+
   private boolean jj_3R_9() {
     if (jj_scan_token(FUNC)) return true;
     if (jj_scan_token(LPAREN)) return true;
@@ -418,12 +414,6 @@
 
   private boolean jj_3_6() {
     if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
     return false;
   }
 
@@ -436,6 +426,22 @@
   private boolean jj_3_4() {
     if (jj_scan_token(MUL)) return true;
     if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_scan_token(FUNC)) return true;
     return false;
   }
 

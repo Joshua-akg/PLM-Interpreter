@@ -9,6 +9,9 @@ PARSER_BEGIN(Assignment)
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
 
+    //Maps function names to their parameters
+    public static HashMap<String, Character> functionParams = new HashMap<String, Character>();
+
     public static void main(String args []) throws Exception {
       try {
         new Assignment(System.in).Program();
@@ -20,7 +23,6 @@ PARSER_BEGIN(Assignment)
       }     
     }
   }
-
 PARSER_END(Assignment)
 
 //Lexical Specification
@@ -77,7 +79,6 @@ void Definition(): {} {
 
 //TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
 //TODO: (8) - Make sure function calls refer to defined functions in the same file #
-//TODO: (11) - Handle error reporting for duplicate functions
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
@@ -88,7 +89,18 @@ void Program(): {Token t;} {
 
   try {
     (Definition() Function())* 
-    <EOF>  
+    <EOF>
+
+    {
+    //check if the all functionCalls are in the functionNames list
+      for (String call : Assignment.functionCalls) {
+        if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")))) {
+          String lineNumber = call.substring(0, call.indexOf(" "));
+          throw new ParseException(lineNumber+"\nWrong call to an undefined function");
+        }
+      }
+    }
+
   } catch (ParseException e) { //Catch error thrown for duplicate main
     if (e.getMessage().contains("Wrong"))
       throw e;
@@ -168,7 +180,6 @@ void Function():
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    // System.err.println(lineNumber+". Wrong Function Format");
     throw new ParseException(lineNumber+"\nWrong Function Format");
   }
 }
@@ -279,9 +290,8 @@ void Function_Call():
   try {
     t = <FUNC> 
     {
-      if (!functionNames.contains(t.image)) {
-        throw new ParseException(t.beginLine+"\nWrong Function call. " + t.image + " not defined");
-      }
+      //add to arraylist of function calls
+      functionCalls.add(t.beginLine + " " + t.image);
     }
     <LPAREN> Expression() <RPAREN>
   } catch (ParseException e) { //catch error thrown for incorrect function call Format
@@ -296,7 +306,6 @@ void Function_Call():
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    // System.out.println("INTERESTING!");
     throw new ParseException(lineNumber+"\nWrong Function Call Format");
   }
 }
