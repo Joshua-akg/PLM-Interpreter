@@ -60,7 +60,7 @@ TOKEN: { < DEFINE: <DEF> <SPACE> > }
 void Definition(): {} {
   try {
     <DEFINE>
-  } catch (ParseException e) { //Catch error thrown for wrong expression
+  } catch (Exception e) { //Catch error thrown for wrong expression
     //extract line number from Exception
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
@@ -68,7 +68,7 @@ void Definition(): {} {
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"\nEach Function must start with (DEF)");
+    throw new Exception(lineNumber+"\nEach Function must start with (DEF)");
   }
 }
 
@@ -96,12 +96,12 @@ void Program(): {Token t;} {
       for (String call : Assignment.functionCalls) {
         if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")+1))) {
           String lineNumber = call.substring(0, call.indexOf(" "));
-          throw new ParseException(lineNumber+"\nWrong call to an undefined function");
+          throw new Exception(lineNumber+"\nWrong call to an undefined function");
         }
       }
     }
 
-  } catch (ParseException e) { //Catch error thrown for duplicate main
+  } catch (Exception e) { //Catch error thrown for duplicate main
     if (e.getMessage().contains("Wrong"))
       throw e;
 
@@ -112,9 +112,10 @@ void Program(): {Token t;} {
     int lineNumber = Integer.parseInt(temp);
 
     if (e.getMessage().contains("MAIN")) {
-      throw new ParseException(lineNumber+"\nDuplicate Main Function");
+      throw new Exception(lineNumber+"\nDuplicate Main Function");
     }
-    throw new ParseException(lineNumber+"\nWrong Function Format"); 
+
+    throw new Exception(lineNumber+"\nWrong Function Format"); 
   }
 }
 
@@ -125,23 +126,23 @@ void Main(): {} {
     {
       Assignment.functionNames.add("MAIN");
     }
-  } catch (ParseException e) { //Catch error thrown for missing main function
+  } catch (Exception e) { //Catch error thrown for missing main function
     //get current line number
     String temp = e.getMessage().substring(
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
     if (e.getMessage().contains("DEF")) {
-      throw new ParseException(lineNumber+"\nWrong Function Format");
+      throw new Exception(lineNumber+"\nWrong DEF Function Format - Function cannot be called DEF");
     }
 
     lineNumber = 0;
-    throw new ParseException(lineNumber+"\nMissing Main Function");
+    throw new Exception(lineNumber+"\nMissing Main Function");
   }
 
   try {
     FunctionBody()
-  } catch (ParseException e) { //Catch error thrown for incorrect main function Format
+  } catch (Exception e) { //Catch error thrown for incorrect main function Format
     if (e.getMessage().contains("Wrong"))
       throw e;
 
@@ -150,7 +151,7 @@ void Main(): {} {
       e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
     );
     int lineNumber = Integer.parseInt(temp);
-    throw new ParseException(lineNumber+"\nWrong Main Function Format"); 
+    throw new Exception(lineNumber+"\nWrong Main Function Format"); 
   }
 }
 
@@ -165,13 +166,13 @@ void Function():
     { //Check if a function with the same name has already been defined
       functionName = t.image;
       if (functionNames.contains(functionName)) {
-        throw new ParseException(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");
+        throw new Exception(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");
       } else {
         functionNames.add(functionName);
       }
     } 
     <SPACE> <PARAM> FunctionBody()
-  } catch (ParseException e) { 
+  } catch (Exception e) { 
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
@@ -183,18 +184,20 @@ void Function():
     );
     int lineNumber = Integer.parseInt(temp);
 
+    //throw message saying the parameter format is wrong
+    if (e.getMessage().contains("PARAM"))
+      throw new Exception(lineNumber+"\nWrong Parameter Format");
+
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"\nWrong Function Format");
+    throw new Exception(lineNumber+"\nWrong Function Format");
   }
 }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
 void FunctionBody(): {} {
-  <SPACE> <LBRACE> <SPACE> 
-  
   try {
-    Expression()
-  } catch (ParseException e) { //Catch error thrown for wrong expression
+  <SPACE> <LBRACE> <SPACE> Expression() <SPACE> <RBRACE> <SPACE>
+  } catch (Exception e) { //Catch error thrown for wrong expression
     //extract line number from Exception
 
     if (e.getMessage().contains("Wrong"))
@@ -205,13 +208,18 @@ void FunctionBody(): {} {
     );
     int lineNumber = Integer.parseInt(tem);
 
-    throw new ParseException(lineNumber+"Wrong Function Body Format");
+    //throw new exception with custom message
+    // if (e.getMessage().contains("PARAM"))
+    // System.out.println(e.getMessage());
+    //   throw new Exception(lineNumber+"\nWrong Parameter Foormat"); //what does this fix?
+
+    throw new Exception(lineNumber+"\nWrong Function Body Format");
   }  
-  <SPACE> <RBRACE> <SPACE> <SCOLON> 
+    <SCOLON> //might give its own try-catch
 
   try {
     <EOL>
-  } catch (ParseException e) { //Catch error thrown for wrong line terminator
+  } catch (Exception e) { //Catch error thrown for wrong line terminator
     if (e.getMessage().contains("Wrong"))
       throw e;
 
@@ -222,7 +230,7 @@ void FunctionBody(): {} {
     int lineNumber = Integer.parseInt(tem);
 
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"Invalid line terminator");
+    throw new Exception(lineNumber+"Invalid line terminator");
   }
 }
 
@@ -230,7 +238,7 @@ void FunctionBody(): {} {
 void Expression(): {} {
   try {
     Term() ( <ADD> Term() )*
-  } catch (ParseException e) {
+  } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
@@ -242,7 +250,7 @@ void Expression(): {} {
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"\nWrong Expression Format");
+    throw new Exception(lineNumber+"\nWrong Expression Format");
   }
 }
 
@@ -250,7 +258,7 @@ void Expression(): {} {
 void Term(): {} {
   try {
     Factor() ( <MUL> Factor() )*
-  } catch (ParseException e) {
+  } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
@@ -262,7 +270,7 @@ void Term(): {} {
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"\nWrong Expression Format");
+    throw new Exception(lineNumber+"\nWrong Expression Format");
   }
 }
 
@@ -271,7 +279,7 @@ void Term(): {} {
 void Factor(): {} {
   try {
     Function_Call() | <PARAM> | <NUM>
-  } catch (ParseException e) {
+  } catch (Exception e) {
     if (e.getMessage().contains("Wrong"))
       throw e;
     else {
@@ -282,7 +290,7 @@ void Factor(): {} {
       int lineNumber = Integer.parseInt(temp);
 
       //throw new excpetion with a custom message
-      throw new ParseException(lineNumber+"\nWrong Expression Format");
+      throw new Exception(lineNumber+"\nWrong Expression Format");
     }
   }
 }
@@ -298,7 +306,7 @@ void Function_Call():
       functionCalls.add(t.beginLine + " " + t.image);
     }
     <LPAREN> Expression() <RPAREN>
-  } catch (ParseException e) { //catch error thrown for incorrect function call Format
+  } catch (Exception e) { //catch error thrown for incorrect function call Format
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
@@ -310,6 +318,6 @@ void Function_Call():
     int lineNumber = Integer.parseInt(temp);
 
     //throw new excpetion with a custom message
-    throw new ParseException(lineNumber+"\nWrong Function Call Format");
+    throw new Exception(lineNumber+"\nWrong Function Call Format");
   }
 }

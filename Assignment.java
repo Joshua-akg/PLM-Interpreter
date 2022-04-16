@@ -92,6 +92,7 @@
     if (e.getMessage().contains("MAIN")) {
       {if (true) throw new ParseException(lineNumber+"\nDuplicate Main Function");}
     }
+
     {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
     }
   }
@@ -109,7 +110,7 @@
     );
     int lineNumber = Integer.parseInt(temp);
     if (e.getMessage().contains("DEF")) {
-      {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
+      {if (true) throw new ParseException(lineNumber+"\nWrong DEF Function Format - Function cannot be called DEF");}
     }
 
     lineNumber = 0;
@@ -159,6 +160,10 @@
     );
     int lineNumber = Integer.parseInt(temp);
 
+    //throw message saying the parameter format is wrong
+    if (e.getMessage().contains("PARAM"))
+      {if (true) throw new ParseException(lineNumber+"\nWrong Parameter Format");}
+
     //throw new excpetion with a custom message
     {if (true) throw new ParseException(lineNumber+"\nWrong Function Format");}
     }
@@ -166,11 +171,14 @@
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
   final public void FunctionBody() throws ParseException {
-    jj_consume_token(SPACE);
-    jj_consume_token(LBRACE);
-    jj_consume_token(SPACE);
     try {
+      jj_consume_token(SPACE);
+      jj_consume_token(LBRACE);
+      jj_consume_token(SPACE);
       Expression();
+      jj_consume_token(SPACE);
+      jj_consume_token(RBRACE);
+      jj_consume_token(SPACE);
     } catch (ParseException e) {
                                //Catch error thrown for wrong expression
     //extract line number from Exception
@@ -183,11 +191,13 @@
     );
     int lineNumber = Integer.parseInt(tem);
 
-    {if (true) throw new ParseException(lineNumber+"Wrong Function Body Format");}
+    //throw new exception with custom message
+    // if (e.getMessage().contains("PARAM"))
+    // System.out.println(e.getMessage());
+    //   throw new ParseException(lineNumber+"\nWrong Parameter Foormat"); //what does this fix?
+
+    {if (true) throw new ParseException(lineNumber+"\nWrong Function Body Format");}
     }
-    jj_consume_token(SPACE);
-    jj_consume_token(RBRACE);
-    jj_consume_token(SPACE);
     jj_consume_token(SCOLON);
     try {
       jj_consume_token(EOL);
@@ -221,7 +231,7 @@
         jj_consume_token(ADD);
         Term();
       }
-    } catch (ParseException e) {
+    } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       {if (true) throw e;}
     }
@@ -373,6 +383,32 @@
     finally { jj_save(6, xla); }
   }
 
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_scan_token(DEFINE)) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_7() {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
   private boolean jj_3R_8() {
     Token xsp;
     xsp = jj_scanpos;
@@ -392,9 +428,8 @@
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
+  private boolean jj_3R_6() {
+    if (jj_scan_token(FUNC)) return true;
     return false;
   }
 
@@ -403,8 +438,9 @@
     return false;
   }
 
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    if (jj_3R_6()) return true;
     return false;
   }
 
@@ -416,32 +452,6 @@
 
   private boolean jj_3_4() {
     if (jj_scan_token(MUL)) return true;
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_7() {
     if (jj_3R_8()) return true;
     return false;
   }
