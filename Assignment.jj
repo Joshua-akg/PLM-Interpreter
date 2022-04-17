@@ -195,7 +195,7 @@ void Function() throws Exception:
       throw new Exception(lineNumber+"\nWrong Parameter Format");
 
     //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nWrong Function Format");
+    throw new Exception(lineNumber+"\nWrong Function Name Format");
   }
 }
 

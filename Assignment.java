@@ -167,7 +167,7 @@
       {if (true) throw new Exception(lineNumber+"\nWrong Parameter Format");}
 
     //throw new excpetion with a custom message
-    {if (true) throw new Exception(lineNumber+"\nWrong Function Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Name Format");}
     }
   }
 
