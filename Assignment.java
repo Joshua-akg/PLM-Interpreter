@@ -22,8 +22,9 @@
         // e.printStackTrace();
       }
     }
-    //add function to calculate line number
 
+
+    //function to retrieve line number from string message
     public static int getLineNumber(String exceptionMessage) {
       String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
       return Integer.parseInt(temp);
@@ -35,18 +36,15 @@
       jj_consume_token(DEFINE);
     } catch (Exception e) {
                           //Catch error thrown for wrong expression
+    // System.out.println(e.getMessage());
+    if (e.getMessage().contains("EOF")) {
+      {if (true) throw new Exception("0\nWrong - Missing Main FUnction");}
+    }
+
     //throw new excpetion with a custom message
-    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nEach Function must start with (DEF)");}
+    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Format - must start with (DEF)");}
     }
   }
-
-//(1) - [CORRECT]   //(2) - [CORRECT]   //(3) - [CORRECT]
-//(4) - [CORRECT]   //(5) - [CORRECT]   //(6) - [CORRECT]
-//(7) - [INCORRECT] //(8) - [INCORRECT]   //(9) - [CORRECT]
-//(10) - [CORRECT]  //(11) - [CORRECT]  //(12) - [CORRECT]
-
-//TODO: (7) - Make sure associated parameters are used in function bodies # hashmap
-//TODO: (8) - Make sure function calls refer to defined functions in the same file #
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
@@ -59,11 +57,16 @@
       } else {
         break label_1;
       }
-      Definition();
       Function();
     }
-    Definition();
-    Main();
+    try {
+      Main();
+    } catch (Exception e) {
+    if (e.getMessage().contains("Wrong"))
+      {if (true) throw e;}
+
+    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong - Missing Main Function");}
+    }
     try {
       label_2:
       while (true) {
@@ -72,7 +75,6 @@
         } else {
           break label_2;
         }
-        Definition();
         Function();
       }
       jj_consume_token(0);
@@ -101,15 +103,21 @@
 
 //Main -> MAIN FunctionBody
   final public void Main() throws ParseException, Exception {
+    Definition();
     try {
       jj_consume_token(MAIN);
       Assignment.functionNames.add("MAIN");
     } catch (Exception e) {
                           //Catch error thrown for missing main function
+
     //get current line number
     int lineNumber = getLineNumber(e.getMessage());
     if (e.getMessage().contains("DEF")) {
       {if (true) throw new Exception(lineNumber+"\nWrong Format - Function cannot be called DEF");}
+    }
+
+    if (e.getMessage().contains("FUNC")) {
+      {if (true) throw new Exception(lineNumber+"\nWrong Function Name Format");}
     }
 
     lineNumber = 0;
@@ -132,6 +140,7 @@
   final public void Function() throws ParseException, Exception {
   String functionName = "";
   Token t;
+    Definition();
     try {
       t = jj_consume_token(FUNC);
       //Check if a function with the same name has already been defined
@@ -179,10 +188,7 @@
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
-    String tem = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-    int lineNumber = Integer.parseInt(tem);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new exception with custom message
     // if (e.getMessage().contains("PARAM"))
@@ -199,11 +205,7 @@
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
-    String tem = e.getMessage().substring(
-      e.getMessage().indexOf("line")+5, e.getMessage().indexOf(",")
-    );
-
-    int lineNumber = Integer.parseInt(tem);
+    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
     {if (true) throw new Exception(lineNumber+"Invalid line terminator");}
@@ -364,17 +366,60 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3R_7() {
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_9()) return true;
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 
   private boolean jj_3R_8() {
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_scan_token(MUL)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_3R_9()) return true;
+    if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(DEFINE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_7() {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3_5()) {
@@ -389,51 +434,7 @@
 
   private boolean jj_3_3() {
     if (jj_scan_token(ADD)) return true;
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
     if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    if (jj_scan_token(DEFINE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
     return false;
   }
 

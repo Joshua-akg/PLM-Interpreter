@@ -27,8 +27,9 @@ PARSER_BEGIN(Assignment)
         // e.printStackTrace();
       }  
     }
-    //add function to calculate line number
-
+    
+    
+    //function to retrieve line number from string message
     public static int getLineNumber(String exceptionMessage) {
       String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
       return Integer.parseInt(temp);
@@ -72,20 +73,35 @@ void Definition() throws Exception: {} {
   try {
     <DEFINE>
   } catch (Exception e) { //Catch error thrown for wrong expression
+    // System.out.println(e.getMessage());
+    if (e.getMessage().contains("EOF")) {
+      throw new Exception("0\nWrong - Missing Main FUnction");
+    }
+
     //throw new excpetion with a custom message
-    throw new Exception(getLineNumber(e.getMessage())+"\nEach Function must start with (DEF)");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Format - must start with (DEF)");
   }
 }
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
 void Program() throws Exception: {Token t;} {
-  (Definition() Function())* 
+  (Function())* 
   
-  Definition() Main()
+  try {
+    Main()
+  }
+  catch (Exception e) {
+    if (e.getMessage().contains("Wrong"))
+      throw e;
+
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong - Missing Main Function");
+
+    
+  }
 
   try {
-    (Definition() Function())* 
+    (Function())* 
     <EOF>
 
     {
@@ -115,16 +131,22 @@ void Program() throws Exception: {Token t;} {
 
 //Main -> MAIN FunctionBody
 void Main() throws Exception: {} {
+  Definition()
   try {
     <MAIN>
     {
       Assignment.functionNames.add("MAIN");
     }
   } catch (Exception e) { //Catch error thrown for missing main function
+
     //get current line number
     int lineNumber = getLineNumber(e.getMessage());
     if (e.getMessage().contains("DEF")) {
       throw new Exception(lineNumber+"\nWrong Format - Function cannot be called DEF");
+    }
+
+    if (e.getMessage().contains("FUNC")) {
+      throw new Exception(lineNumber+"\nWrong Function Name Format");
     }
 
     lineNumber = 0;
@@ -148,7 +170,7 @@ void Function() throws Exception:
 { String functionName = "";
   Token t;} 
 {
-  
+  Definition()
   try {
     t = <FUNC> 
     { //Check if a function with the same name has already been defined
@@ -158,7 +180,7 @@ void Function() throws Exception:
       } else {
         functionNames.add(functionName);
       }
-    } 
+    } //throw exception and catch it to get line number of param and then add that to the map
     <SPACE> <PARAM> FunctionBody()
   } catch (Exception e) { //Catch error thrown for missing function name
     if (e.getMessage().contains("Wrong")) {
