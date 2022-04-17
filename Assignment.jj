@@ -1,5 +1,5 @@
 options{
-  lookahead = 2;
+  lookahead = 3;
   STATIC = false;
 }
 
@@ -8,9 +8,9 @@ PARSER_BEGIN(Assignment)
   public class Assignment{
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
-
-    //Maps function names to their parameters
-    public static HashMap<String, Character> functionParams = new HashMap<String, Character>();
+    
+    //create new stack for function parameters
+    public static Stack<String> functionParams = new Stack<String>();
 
     public static void main(String args []) throws Throwable {
       try {
@@ -27,7 +27,6 @@ PARSER_BEGIN(Assignment)
         // e.printStackTrace();
       }  
     }
-    
     
     //function to retrieve line number from string message
     public static int getLineNumber(String exceptionMessage) {
@@ -96,8 +95,6 @@ void Program() throws Exception: {Token t;} {
       throw e;
 
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong - Missing Main Function");
-
-    
   }
 
   try {
@@ -125,6 +122,8 @@ void Program() throws Exception: {Token t;} {
       throw new Exception(lineNumber+"\nDuplicate Main Function");
     }
 
+    //print message
+    // System.out.println(e.getMessage());
     throw new Exception(lineNumber+"\nWrong Function Format"); 
   }
 }
@@ -166,10 +165,7 @@ void Main() throws Exception: {} {
 }
 
 //Function -> FUNC PARAM FunctionBody
-void Function() throws Exception:
-{ String functionName = "";
-  Token t;} 
-{
+void Function() throws Exception:{ String functionName = ""; Token t; Token p;} {
   Definition()
   try {
     t = <FUNC> 
@@ -181,7 +177,11 @@ void Function() throws Exception:
         functionNames.add(functionName);
       }
     } //throw exception and catch it to get line number of param and then add that to the map
-    <SPACE> <PARAM> FunctionBody()
+    <SPACE> 
+
+    p = <PARAM> {functionParams.push(p.image);} 
+
+    FunctionBody()
   } catch (Exception e) { //Catch error thrown for missing function name
     if (e.getMessage().contains("Wrong")) {
       throw e;
@@ -195,7 +195,9 @@ void Function() throws Exception:
       throw new Exception(lineNumber+"\nWrong Parameter Format");
 
     //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nWrong Function Name Format");
+    //print the current message
+    System.out.println(e.getMessage());
+    throw new Exception(lineNumber+"\nWrong Function Name Foormat");
   }
 }
 
@@ -269,9 +271,15 @@ void Term() throws Exception: {} {
 
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
-void Factor() throws Exception: {} {
+void Factor() throws Exception: {Token t;} {
   try {
-    Function_Call() | <PARAM> | <NUM>
+    Function_Call() 
+    | t = <PARAM> {
+      if (!functionParams.pop().equals(t.image)) {
+        throw new Exception(t.beginLine+"\nWrong Parameter within function body");
+      }
+    } 
+    | <NUM>
   } catch (Exception e) {
     if (e.getMessage().contains("Wrong"))
       throw e;
@@ -286,9 +294,7 @@ void Factor() throws Exception: {} {
 }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
-void Function_Call() throws Exception:
-{Token t;}
-{
+void Function_Call() throws Exception: {Token t;} {
   try {
     t = <FUNC> 
     {

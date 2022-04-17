@@ -4,8 +4,8 @@
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
 
-    //Maps function names to their parameters
-    public static HashMap<String, Character> functionParams = new HashMap<String, Character>();
+    //create new stack for function parameters
+    public static Stack<String> functionParams = new Stack<String>();
 
     public static void main(String args []) throws Throwable {
       try {
@@ -22,7 +22,6 @@
         // e.printStackTrace();
       }
     }
-
 
     //function to retrieve line number from string message
     public static int getLineNumber(String exceptionMessage) {
@@ -52,7 +51,7 @@
                                   Token t;
     label_1:
     while (true) {
-      if (jj_2_1(2)) {
+      if (jj_2_1(3)) {
         ;
       } else {
         break label_1;
@@ -70,7 +69,7 @@
     try {
       label_2:
       while (true) {
-        if (jj_2_2(2)) {
+        if (jj_2_2(3)) {
           ;
         } else {
           break label_2;
@@ -97,6 +96,8 @@
       {if (true) throw new Exception(lineNumber+"\nDuplicate Main Function");}
     }
 
+    //print message
+    // System.out.println(e.getMessage());
     {if (true) throw new Exception(lineNumber+"\nWrong Function Format");}
     }
   }
@@ -138,8 +139,7 @@
 
 //Function -> FUNC PARAM FunctionBody
   final public void Function() throws ParseException, Exception {
-  String functionName = "";
-  Token t;
+                                   String functionName = ""; Token t; Token p;
     Definition();
     try {
       t = jj_consume_token(FUNC);
@@ -151,7 +151,8 @@
         functionNames.add(functionName);
       }
       jj_consume_token(SPACE);
-      jj_consume_token(PARAM);
+      p = jj_consume_token(PARAM);
+                 functionParams.push(p.image);
       FunctionBody();
     } catch (Exception e) {
                           //Catch error thrown for missing function name
@@ -167,7 +168,9 @@
       {if (true) throw new Exception(lineNumber+"\nWrong Parameter Format");}
 
     //throw new excpetion with a custom message
-    {if (true) throw new Exception(lineNumber+"\nWrong Function Name Format");}
+    //print the current message
+    System.out.println(e.getMessage());
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Name Foormat");}
     }
   }
 
@@ -218,7 +221,7 @@
       Term();
       label_3:
       while (true) {
-        if (jj_2_3(2)) {
+        if (jj_2_3(3)) {
           ;
         } else {
           break label_3;
@@ -245,7 +248,7 @@
       Factor();
       label_4:
       while (true) {
-        if (jj_2_4(2)) {
+        if (jj_2_4(3)) {
           ;
         } else {
           break label_4;
@@ -269,12 +272,16 @@
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
   final public void Factor() throws ParseException, Exception {
+                                 Token t;
     try {
-      if (jj_2_5(2)) {
+      if (jj_2_5(3)) {
         Function_Call();
-      } else if (jj_2_6(2)) {
-        jj_consume_token(PARAM);
-      } else if (jj_2_7(2)) {
+      } else if (jj_2_6(3)) {
+        t = jj_consume_token(PARAM);
+      if (!functionParams.pop().equals(t.image)) {
+        {if (true) throw new Exception(t.beginLine+"\nWrong Parameter within function body");}
+      }
+      } else if (jj_2_7(3)) {
         jj_consume_token(NUM);
       } else {
         jj_consume_token(-1);
@@ -295,7 +302,7 @@
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
   final public void Function_Call() throws ParseException, Exception {
- Token t;
+                                        Token t;
     try {
       t = jj_consume_token(FUNC);
       //add to arraylist of function calls
@@ -366,17 +373,6 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_8() {
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
   private boolean jj_3_4() {
     if (jj_scan_token(MUL)) return true;
     if (jj_3R_7()) return true;
@@ -388,9 +384,8 @@
     return false;
   }
 
-  private boolean jj_3R_5() {
-    if (jj_3R_9()) return true;
-    if (jj_scan_token(FUNC)) return true;
+  private boolean jj_3R_10() {
+    if (jj_3R_6()) return true;
     return false;
   }
 
@@ -399,13 +394,30 @@
     return false;
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(DEFINE)) return true;
+  private boolean jj_3R_5() {
+    if (jj_3R_9()) return true;
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(SPACE)) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3_4()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(DEFINE)) return true;
     return false;
   }
 
@@ -414,8 +426,10 @@
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
+  private boolean jj_3R_8() {
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(LPAREN)) return true;
+    if (jj_3R_10()) return true;
     return false;
   }
 
@@ -435,6 +449,11 @@
   private boolean jj_3_3() {
     if (jj_scan_token(ADD)) return true;
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
     return false;
   }
 
