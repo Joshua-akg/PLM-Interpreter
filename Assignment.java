@@ -37,7 +37,7 @@
                           //Catch error thrown for wrong expression
     // System.out.println(e.getMessage());
     if (e.getMessage().contains("EOF")) {
-      {if (true) throw new Exception("0\nWrong - Missing Main FUnction");}
+      {if (true) throw new Exception("0\nWrong Program Structure - Missing Main FUnction");}
     }
 
     //throw new excpetion with a custom message
@@ -64,7 +64,7 @@
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
-    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong - Missing Main Function");}
+    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Program Structure - Missing Main Function");}
     }
     try {
       label_2:
@@ -93,11 +93,12 @@
     int lineNumber = getLineNumber(e.getMessage());
 
     if (e.getMessage().contains("MAIN")) {
-      {if (true) throw new Exception(lineNumber+"\nDuplicate Main Function");}
+      //wrong
+      {if (true) throw new Exception(lineNumber+"\nWrong Program Structure - Duplicate Main Function");}
     }
 
     //print message
-    // System.out.println(e.getMessage());
+    System.out.println(e.getMessage());
     {if (true) throw new Exception(lineNumber+"\nWrong Function Format");}
     }
   }
@@ -122,7 +123,7 @@
     }
 
     lineNumber = 0;
-    {if (true) throw new Exception(lineNumber+"\nMissing Main Function");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Program Structure - Missing Main Function");}
     }
     try {
       FunctionBody();
@@ -146,13 +147,13 @@
       //Check if a function with the same name has already been defined
       functionName = t.image;
       if (functionNames.contains(functionName)) {
-        {if (true) throw new Exception(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");}
+        {if (true) throw new Exception(t.beginLine+"\nWrong Program Structure - '" + functionName + "' already defined");}
       } else {
         functionNames.add(functionName);
       }
       jj_consume_token(SPACE);
       p = jj_consume_token(PARAM);
-                 functionParams.push(p.image);
+     functionParams.push(p.image);
       FunctionBody();
     } catch (Exception e) {
                           //Catch error thrown for missing function name
@@ -168,9 +169,7 @@
       {if (true) throw new Exception(lineNumber+"\nWrong Parameter Format");}
 
     //throw new excpetion with a custom message
-    //print the current message
-    System.out.println(e.getMessage());
-    {if (true) throw new Exception(lineNumber+"\nWrong Function Name Foormat");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Name Format");}
     }
   }
 
@@ -278,7 +277,7 @@
         Function_Call();
       } else if (jj_2_6(3)) {
         t = jj_consume_token(PARAM);
-      if (!functionParams.pop().equals(t.image)) {
+      if (!(functionParams.peek().equals(t.image))) {
         {if (true) throw new Exception(t.beginLine+"\nWrong Parameter within function body");}
       }
       } else if (jj_2_7(3)) {
@@ -305,7 +304,7 @@
                                         Token t;
     try {
       t = jj_consume_token(FUNC);
-      //add to arraylist of function calls
+      //add line number and function call to arraylist of function calls
       functionCalls.add(t.beginLine + " " + t.image);
       jj_consume_token(LPAREN);
       Expression();
@@ -373,6 +372,11 @@
     finally { jj_save(6, xla); }
   }
 
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
   private boolean jj_3_4() {
     if (jj_scan_token(MUL)) return true;
     if (jj_3R_7()) return true;
@@ -384,13 +388,13 @@
     return false;
   }
 
-  private boolean jj_3R_10() {
-    if (jj_3R_6()) return true;
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
     return false;
   }
 
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
+  private boolean jj_3R_10() {
+    if (jj_3R_6()) return true;
     return false;
   }
 
@@ -449,11 +453,6 @@
   private boolean jj_3_3() {
     if (jj_scan_token(ADD)) return true;
     if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
     return false;
   }
 

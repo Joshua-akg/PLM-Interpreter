@@ -42,8 +42,6 @@ PARSER_END(Assignment)
 TOKEN: { < SPACE: " " > }
 //End of line tokens
 TOKEN: { < EOL: "\n" | "\r" | "\r\n" > }
-//End of file
-// TOKEN: { <EOF: "\0">}
 //Arithmetic operators
 TOKEN: { < ADD: "+" > | < MUL: "*" > }
 //Parenthesis
@@ -74,7 +72,7 @@ void Definition() throws Exception: {} {
   } catch (Exception e) { //Catch error thrown for wrong expression
     // System.out.println(e.getMessage());
     if (e.getMessage().contains("EOF")) {
-      throw new Exception("0\nWrong - Missing Main FUnction");
+      throw new Exception("0\nWrong Program Structure - Missing Main FUnction");
     }
 
     //throw new excpetion with a custom message
@@ -94,7 +92,7 @@ void Program() throws Exception: {Token t;} {
     if (e.getMessage().contains("Wrong"))
       throw e;
 
-    throw new Exception(getLineNumber(e.getMessage())+"\nWrong - Missing Main Function");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Program Structure - Missing Main Function");
   }
 
   try {
@@ -119,11 +117,12 @@ void Program() throws Exception: {Token t;} {
     int lineNumber = getLineNumber(e.getMessage());
 
     if (e.getMessage().contains("MAIN")) {
-      throw new Exception(lineNumber+"\nDuplicate Main Function");
+      //wrong
+      throw new Exception(lineNumber+"\nWrong Program Structure - Duplicate Main Function");
     }
 
     //print message
-    // System.out.println(e.getMessage());
+    System.out.println(e.getMessage());
     throw new Exception(lineNumber+"\nWrong Function Format"); 
   }
 }
@@ -149,7 +148,7 @@ void Main() throws Exception: {} {
     }
 
     lineNumber = 0;
-    throw new Exception(lineNumber+"\nMissing Main Function");
+    throw new Exception(lineNumber+"\nWrong Program Structure - Missing Main Function");
   }
 
   try {
@@ -172,14 +171,15 @@ void Function() throws Exception:{ String functionName = ""; Token t; Token p;} 
     { //Check if a function with the same name has already been defined
       functionName = t.image;
       if (functionNames.contains(functionName)) {
-        throw new Exception(t.beginLine+"\nWrong Function Definition - '" + functionName + "' already defined");
+        throw new Exception(t.beginLine+"\nWrong Program Structure - '" + functionName + "' already defined");
       } else {
         functionNames.add(functionName);
       }
     } //throw exception and catch it to get line number of param and then add that to the map
     <SPACE> 
 
-    p = <PARAM> {functionParams.push(p.image);} 
+    p = <PARAM> 
+    {functionParams.push(p.image);} 
 
     FunctionBody()
   } catch (Exception e) { //Catch error thrown for missing function name
@@ -195,9 +195,7 @@ void Function() throws Exception:{ String functionName = ""; Token t; Token p;} 
       throw new Exception(lineNumber+"\nWrong Parameter Format");
 
     //throw new excpetion with a custom message
-    //print the current message
-    System.out.println(e.getMessage());
-    throw new Exception(lineNumber+"\nWrong Function Name Foormat");
+    throw new Exception(lineNumber+"\nWrong Function Name Format");
   }
 }
 
@@ -274,8 +272,9 @@ void Term() throws Exception: {} {
 void Factor() throws Exception: {Token t;} {
   try {
     Function_Call() 
-    | t = <PARAM> {
-      if (!functionParams.pop().equals(t.image)) {
+    | t = <PARAM> 
+    {
+      if (!(functionParams.peek().equals(t.image))) {
         throw new Exception(t.beginLine+"\nWrong Parameter within function body");
       }
     } 
@@ -298,7 +297,7 @@ void Function_Call() throws Exception: {Token t;} {
   try {
     t = <FUNC> 
     {
-      //add to arraylist of function calls
+      //add line number and function call to arraylist of function calls
       functionCalls.add(t.beginLine + " " + t.image);
     }
     <LPAREN> Expression() <RPAREN>
