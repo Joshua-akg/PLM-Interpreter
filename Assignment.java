@@ -16,7 +16,7 @@
 
         //check if e is an instance of error
         if (e instanceof Error) {
-          System.err.println(getLineNumber(e.getMessage())+"\nNon-Token character found");
+          System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
         } else
             System.err.println(e.getMessage());
         // e.printStackTrace();
@@ -25,6 +25,9 @@
 
     //function to retrieve line number from string message
     public static int getLineNumber(String exceptionMessage) {
+      // //Print the string
+      // System.out.println(exceptionMessage+"\n\n");
+
       String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
       return Integer.parseInt(temp);
     }
@@ -35,7 +38,6 @@
       jj_consume_token(DEFINE);
     } catch (Exception e) {
                           //Catch error thrown for wrong expression
-    // System.out.println(e.getMessage());
     if (e.getMessage().contains("EOF")) {
       {if (true) throw new Exception("0\nWrong Program Structure - Missing Main FUnction");}
     }
@@ -51,7 +53,7 @@
                                   Token t;
     label_1:
     while (true) {
-      if (jj_2_1(3)) {
+      if (jj_2_1(2)) {
         ;
       } else {
         break label_1;
@@ -69,7 +71,7 @@
     try {
       label_2:
       while (true) {
-        if (jj_2_2(3)) {
+        if (jj_2_2(2)) {
           ;
         } else {
           break label_2;
@@ -86,6 +88,9 @@
       }
     } catch (Exception e) {
                           //Catch error thrown for duplicate main
+    // //print message
+    // System.out.println(e.getMessage());
+
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
@@ -93,13 +98,10 @@
     int lineNumber = getLineNumber(e.getMessage());
 
     if (e.getMessage().contains("MAIN")) {
-      //wrong
       {if (true) throw new Exception(lineNumber+"\nWrong Program Structure - Duplicate Main Function");}
     }
 
-    //print message
-    System.out.println(e.getMessage());
-    {if (true) throw new Exception(lineNumber+"\nWrong Function Format");}
+    {if (true) throw new Exception(lineNumber+"\nWrong Function Name Format");}
     }
   }
 
@@ -168,6 +170,9 @@
     if (e.getMessage().contains("PARAM"))
       {if (true) throw new Exception(lineNumber+"\nWrong Parameter Format");}
 
+    //print the error message
+    // System.out.println(e.getMessage());
+
     //throw new excpetion with a custom message
     {if (true) throw new Exception(lineNumber+"\nWrong Function Name Format");}
     }
@@ -192,11 +197,6 @@
 
     int lineNumber = getLineNumber(e.getMessage());
 
-    //throw new exception with custom message
-    // if (e.getMessage().contains("PARAM"))
-    // System.out.println(e.getMessage());
-    //   throw new Exception(lineNumber+"\nWrong Parameter Foormat"); //what does this fix?
-
     {if (true) throw new Exception(lineNumber+"\nWrong Function Body Format");}
     }
     jj_consume_token(SCOLON);
@@ -210,7 +210,7 @@
     int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
-    {if (true) throw new Exception(lineNumber+"Invalid line terminator");}
+    {if (true) throw new Exception(lineNumber+"\nWrong function terminator");}
     }
   }
 
@@ -220,7 +220,7 @@
       Term();
       label_3:
       while (true) {
-        if (jj_2_3(3)) {
+        if (jj_2_3(2)) {
           ;
         } else {
           break label_3;
@@ -247,7 +247,7 @@
       Factor();
       label_4:
       while (true) {
-        if (jj_2_4(3)) {
+        if (jj_2_4(2)) {
           ;
         } else {
           break label_4;
@@ -273,14 +273,14 @@
   final public void Factor() throws ParseException, Exception {
                                  Token t;
     try {
-      if (jj_2_5(3)) {
+      if (jj_2_5(2)) {
         Function_Call();
-      } else if (jj_2_6(3)) {
+      } else if (jj_2_6(2)) {
         t = jj_consume_token(PARAM);
       if (!(functionParams.peek().equals(t.image))) {
         {if (true) throw new Exception(t.beginLine+"\nWrong Parameter within function body");}
       }
-      } else if (jj_2_7(3)) {
+      } else if (jj_2_7(2)) {
         jj_consume_token(NUM);
       } else {
         jj_consume_token(-1);
@@ -372,68 +372,9 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_scan_token(MUL)) return true;
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_10() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    if (jj_3R_9()) return true;
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(SPACE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_3R_7()) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3_4()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(DEFINE)) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
   private boolean jj_3R_8() {
     if (jj_scan_token(FUNC)) return true;
     if (jj_scan_token(LPAREN)) return true;
-    if (jj_3R_10()) return true;
     return false;
   }
 
@@ -450,9 +391,56 @@
     return false;
   }
 
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
   private boolean jj_3_3() {
     if (jj_scan_token(ADD)) return true;
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_scan_token(MUL)) return true;
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_3R_9()) return true;
+    if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(DEFINE)) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_8()) return true;
     return false;
   }
 
