@@ -133,19 +133,16 @@ void Main() throws Exception: {} {
       Assignment.functionNames.add("MAIN");
     }
   } catch (Exception e) { //Catch error thrown for missing main function
-
-    //get current line number
-    int lineNumber = getLineNumber(e.getMessage());
     if (e.getMessage().contains("DEF")) {
-      throw new Exception(lineNumber+"\nWrong Format - Function cannot be called DEF");
+      throw new Exception(getLineNumber(e.getMessage())+"\nWrong Format - Function cannot be called DEF");
     }
 
     if (e.getMessage().contains("FUNC")) {
-      throw new Exception(lineNumber+"\nWrong Function Name Format");
+      throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
     }
 
     lineNumber = 0;
-    throw new Exception(lineNumber+"\nWrong Program Structure - Missing Main Function");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Program Structure - Missing Main Function");
   }
 
   try {
@@ -154,9 +151,7 @@ void Main() throws Exception: {} {
     if (e.getMessage().contains("Wrong"))
       throw e;
 
-    //get current line number
-    int lineNumber = getLineNumber(e.getMessage());
-    throw new Exception(lineNumber+"\nWrong Main Function Format"); 
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Main Function Format"); 
   }
 }
 
@@ -183,19 +178,16 @@ void Function() throws Exception:{ String functionName = ""; Token t; Token p;} 
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
-    
-    //extract line number from Exception
-    int lineNumber = getLineNumber(e.getMessage());
 
     //throw message saying the parameter format is wrong
     if (e.getMessage().contains("PARAM"))
-      throw new Exception(lineNumber+"\nWrong Parameter Format");
+      throw new Exception(getLineNumber(e.getMessage())+"\nWrong Parameter Format");
 
     //print the error message
     // System.out.println(e.getMessage());
 
     //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nWrong Function Name Format");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
   }
 }
 
@@ -209,9 +201,7 @@ void FunctionBody() throws Exception: {} {
     if (e.getMessage().contains("Wrong"))
       throw e;
 
-    int lineNumber = getLineNumber(e.getMessage());
-
-    throw new Exception(lineNumber+"\nWrong Function Body Format");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Body Format");
   }  
     <SCOLON> //might give its own try-catch
 
@@ -237,11 +227,8 @@ void Expression() throws Exception: {} {
       throw e;
     }
 
-    //extract line number from Exception
-    int lineNumber = getLineNumber(e.getMessage());
-
     //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nWrong Expression Format");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");
   }
 }
 
@@ -254,11 +241,8 @@ void Term() throws Exception: {} {
       throw e;
     }
 
-    //extract line number from Exception
-    int lineNumber = getLineNumber(e.getMessage());
-
     //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nWrong Expression Format");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");
   }
 }
 
