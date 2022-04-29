@@ -1,1 +1,2 @@
-DEF MAIN { 11+3 } ;
+DEF MAIN { ADDIN(3) } ;
+DEF ADDIN x { x+1 } ;

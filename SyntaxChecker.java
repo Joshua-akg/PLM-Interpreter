@@ -18,7 +18,7 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
     public static void main(String[] args) throws ParseException {
         try {
             Exp res = new SyntaxChecker(System.in).parse();
-            System.out.println(res);
+            System.out.println("Result of parse: "+res);
             System.out.println("PASS");
             System.out.println(evaluatePostfix(res.toString()));
         } catch (ParseException e) {
@@ -247,7 +247,7 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case FUNCTION_NAME:
         t = jj_consume_token(FUNCTION_NAME);
-                              functionName = t.image;
+                               functionName = t.image;
         break;
       case DEF:
         jj_consume_token(DEF);
@@ -258,14 +258,11 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-            functionCalls.add(functionName);
+          functionCalls.add(functionName);
       jj_consume_token(3);
       exp = E();
       jj_consume_token(4);
-          //return new BaldBinary(exp, fMap.get(functionName));
-//           if (fMap.get(functionName) != null) return new BaldBinary(exp, fMap.get(functionName));
-//           else return new BaldBinary (exp,
-            {if (true) return new FunctionCall(functionName, exp);}
+                {if (true) return new FunctionCall(functionName, exp);}
     } catch (ParseException e) {
         System.err.println("[PARSING ERROR] Incorrect function call.");
         {if (true) throw e;}
@@ -547,10 +544,4 @@ class BinaryExp extends Exp {
     public String toString() {
         return "(" + left.toString() + "|" + right.toString() + op + ")";
     }
-}
-
-class BaldBinary extends Exp {
-    Exp left, right;
-    BaldBinary (Exp l, Exp r) { this.left = l; this.right = r; }
-    public String toString() { return left.toString() + " " + right.toString(); }
 }
