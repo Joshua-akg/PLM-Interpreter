@@ -6,11 +6,15 @@ options{
 PARSER_BEGIN(Assignment)
   import java.util.*;
   public class Assignment{
+    //Arraylist for function names and calls to make sure all calls are to functions in the program
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
     
-    //create new stack for function parameters
+    //create new stack for function parameters to make sure function bodies only used corresponding parameters
     public static Stack<String> functionParams = new Stack<String>();
+
+    //Function map to store function names mapped to their details (parameter and body)
+    public static HashMap<String, Function> functionDetails = new HashMap<String, Function>();
 
     public static void main(String args []) throws Throwable {
       try {
@@ -33,11 +37,73 @@ PARSER_BEGIN(Assignment)
       String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
       return Integer.parseInt(temp);
     }
+
+    //create a class to represent functions
+    public class Function {
+      public String param;
+      public Expression body;
+
+      //Function constructor
+      public Function(String param, Expression body) {
+        this.param = param;
+        this.body = body;
+      }
+
+      //getters, return the function details - not sure it's needed since it's public
+      public String getParam() {
+        return param;
+      }
+
+      public Expression getBody() {
+        return body;
+      }
+    }
+
+    //create a class to represent expressions
+    public abstract class Expression {}
+
+    //create classes for the different types of expressions - numbers, parameters, functioncalls
+    
+    //class for numbers
+    public class Number extends Expression {
+      public int value;
+
+      public Number(int value) {
+        this.value = value;
+      }
+    }
+
+    //class for parameters
+    public class Parameter extends Expression {
+      public String param;
+
+      //Parameter constructor
+      public Parameter(String param) {
+        this.param = param;
+      }
+    }
+
+    //class for function calls
+    public class Functioncall extends Expression {
+      public String functionName;
+      public Expression argument;
+
+      //Functioncall constructor
+      public Functioncall(String name, Expression arg) {
+        this.functionName = name;
+        this.argument = arg;
+      }
+
+      //string form with parameters replaced
+      // public String get
+    }
+
+
+
   }
 PARSER_END(Assignment)
 
 //Lexical Specification
-
 SKIP:  { "\t" | "\r" }
 //Space
 TOKEN: { < SPACE: " " > }
@@ -113,14 +179,11 @@ void Program() throws Exception: {Token t; double result;} {
     if (e.getMessage().contains("Wrong"))
       throw e;
 
-    //get current line number
-    int lineNumber = getLineNumber(e.getMessage());
-
     if (e.getMessage().contains("MAIN")) {
-      throw new Exception(lineNumber+"\nWrong Program Structure - Duplicate Main Function");
+      throw new Exception(getLineNumber(e.getMessage())+"\nWrong Program Structure - Duplicate Main Function");
     }
 
-    throw new Exception(lineNumber+"\nWrong Function Name Format");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
   }
 }
 
@@ -141,8 +204,7 @@ void Main() throws Exception: {} {
       throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
     }
 
-    lineNumber = 0;
-    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Program Structure - Missing Main Function");
+    throw new Exception("0\nWrong Program Structure - Missing Main Function");
   }
 
   try {

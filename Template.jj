@@ -121,8 +121,7 @@ PARSER_END(SyntaxChecker)
 
 SKIP:  { "\t" | "\r" }
 TOKEN:
-{
-  "("
+{ "("
 | ")"
 | "+"
 | "*"
