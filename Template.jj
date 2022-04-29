@@ -299,25 +299,22 @@ Exp function_call() throws ParseException:
         <DEF> { functionName = "DEF"; }
         ) { functionCalls.add(functionName); } //TODO: is this the correct location???
         "(" exp = E() ")"
-          {
-          //return new BaldBinary(exp, fMap.get(functionName));
-//           if (fMap.get(functionName) != null) return new BaldBinary(exp, fMap.get(functionName));
-//           else return new BaldBinary (exp,
-            return new FunctionCall(functionName, exp);
-           } // if the function doesn't have param in it, return the num
+            
+            {
+                return new FunctionCall(functionName, exp);
+            } // if the function doesn't have param in it, return the num
          //{ return exp; }
         //{ return new BinaryExp("+", exp, fMap.get(functionName)); }
        // functionmap.getfbody(functionName).hasParam()? => replace otherwise get the function body (which is an expr)
        // if the function body contains the parameter then replace that with the given parameter ergo E() above
        // though not exactly necessary, !!! I NEED TO GET THE OP
-    }
-
-    catch (ParseException e) {
+    } catch (ParseException e) {
         System.err.println("[PARSING ERROR] Incorrect function call.");
         throw e;
         System.exit(0);
     }
 }
+
 Exp F() throws ParseException:
 {
     Exp exp;
