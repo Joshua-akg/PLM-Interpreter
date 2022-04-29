@@ -236,16 +236,9 @@ Exp normal_function() throws ParseException:
 }
 {
     try {
-        (
-        //<FUNCTION_NAME>
-        //" "
-        //param = <PARAMETER_NAME>
-        exp = function_body()
-        )
+        (exp = function_body())
         { return exp; }
-    }
-
-    catch (ParseException e) {
+    } catch (ParseException e) {
         System.err.println("[PARSING ERROR] Incorrect parameter name.");
         throw e;
         System.exit(0);
@@ -257,12 +250,12 @@ Exp main_function():
     Exp exp;
 }
 {
-    (
-    <MAIN>
+    (<MAIN>
     exp = function_body()
     )
     { return exp; }
 }
+
 Exp function_body() throws ParseException:
 {
     Exp exp;
@@ -280,9 +273,7 @@ Exp function_body() throws ParseException:
         <SEMICOLON>
         )
         { return exp; }
-    }
-
-    catch (ParseException e) {
+    } catch (ParseException e) {
         System.err.println("[PARSING ERROR] Incorrect function body formatting.");
         throw e;
         System.exit(0);

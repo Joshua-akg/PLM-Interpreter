@@ -278,11 +278,8 @@ void Factor() throws Exception: {Token t;} {
     if (e.getMessage().contains("Wrong"))
       throw e;
     else {
-      //extract line number from Exception
-      int lineNumber = getLineNumber(e.getMessage());
-
       //throw new excpetion with a custom message
-      throw new Exception(lineNumber+"\nWrong Expression Format");
+      throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");
     }
   }
 }
@@ -300,11 +297,8 @@ void Function_Call() throws Exception: {Token t;} {
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
-    
-    //extract line number from Exception
-    int lineNumber = getLineNumber(e.getMessage());
 
     //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nWrong Function Call Format");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Call Format");
   }
 }

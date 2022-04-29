@@ -158,10 +158,7 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
   static final public Exp normal_function() throws ParseException, ParseException {
     Exp exp;
     try {
-      //<FUNCTION_NAME>
-              //" "
-              //param = <PARAMETER_NAME>
-              exp = function_body();
+      exp = function_body();
           {if (true) return exp;}
     } catch (ParseException e) {
         System.err.println("[PARSING ERROR] Incorrect parameter name.");
