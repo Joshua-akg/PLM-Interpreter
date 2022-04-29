@@ -25,9 +25,6 @@
 
     //function to retrieve line number from string message
     public static int getLineNumber(String exceptionMessage) {
-      // //Print the string
-      // System.out.println(exceptionMessage+"\n\n");
-
       String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
       return Integer.parseInt(temp);
     }
@@ -50,7 +47,7 @@
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
   final public void Program() throws ParseException, Exception {
-                                  Token t;
+                                  Token t; double result;
     label_1:
     while (true) {
       if (jj_2_1(2)) {
@@ -88,7 +85,7 @@
       }
     } catch (Exception e) {
                           //Catch error thrown for duplicate main
-    // //print message
+    //print message
     // System.out.println(e.getMessage());
 
     if (e.getMessage().contains("Wrong"))
@@ -277,9 +274,9 @@
         Function_Call();
       } else if (jj_2_6(2)) {
         t = jj_consume_token(PARAM);
-      if (!(functionParams.peek().equals(t.image))) {
-        {if (true) throw new Exception(t.beginLine+"\nWrong Parameter within function body");}
-      }
+        if (!(functionParams.peek().equals(t.image))) {
+          {if (true) throw new Exception(t.beginLine+"\nWrong Parameter within function body");}
+        }
       } else if (jj_2_7(2)) {
         jj_consume_token(NUM);
       } else {
@@ -372,6 +369,11 @@
     finally { jj_save(6, xla); }
   }
 
+  private boolean jj_3_5() {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
   private boolean jj_3R_8() {
     if (jj_scan_token(FUNC)) return true;
     if (jj_scan_token(LPAREN)) return true;
@@ -391,14 +393,14 @@
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
   private boolean jj_3_3() {
     if (jj_scan_token(ADD)) return true;
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
     return false;
   }
 
@@ -436,11 +438,6 @@
 
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_8()) return true;
     return false;
   }
 
@@ -653,7 +650,7 @@
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[16];
+    boolean[] la1tokens = new boolean[18];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -667,7 +664,7 @@
         }
       }
     }
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 18; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
