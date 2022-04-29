@@ -84,12 +84,12 @@ PARSER_BEGIN(Assignment)
     }
 
     //class for function calls
-    public class Functioncall extends Expression {
+    public class FunctionCall extends Expression {
       public String functionName;
       public Expression argument;
 
-      //Functioncall constructor
-      public Functioncall(String name, Expression arg) {
+      //FunctionCall constructor
+      public FunctionCall(String name, Expression arg) {
         this.functionName = name;
         this.argument = arg;
       }
@@ -98,8 +98,21 @@ PARSER_BEGIN(Assignment)
       // public String get
     }
 
+    //class for binary expressions
+    public class Binary extends Expression {
+      public Expression left;
+      public Expression right;
+      public String operator;
 
+      //Binary constructor
+      public Binary(Expression left, String op, Expression right) {
+        this.left = left;
+        this.right = right;
+        this.operator = op;
+      }
 
+      //String form with left and right operands and operator
+    }
   }
 PARSER_END(Assignment)
 
@@ -280,30 +293,41 @@ void FunctionBody() throws Exception: {} {
   }
 }
 
+//split expressions into terms to preserve order of operations
 //EXPR -> TERM ADD TERM | TERM
-void Expression() throws Exception: {} {
+Expression Expression() throws Exception: {Expression left, right;} {
   try {
-    Term() ( <ADD> Term() )*
+    left = Term() 
+      ( 
+        <ADD> right = Term() 
+        {left = new Binary(left, "+", right);}
+      )*
+    {return left;}
   } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
 
-    //throw new excpetion with a custom message
+    //throw new exception with a custom message
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");
   }
 }
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
-void Term() throws Exception: {} {
+Expression Term() throws Exception: {Expression left, right;} {
   try {
-    Factor() ( <MUL> Factor() )*
+    left = Factor() 
+      ( 
+        <MUL> right = Factor()
+        {left = new Binary(left, "*", right);}
+      )*
+    {return left;}
   } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
 
-    //throw new excpetion with a custom message
+    //throw new exception with a custom message
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");
   }
 }
@@ -335,14 +359,17 @@ Expression Factor() throws Exception: {Token num; Expression exp; Token param;} 
 }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
-void Function_Call() throws Exception: {Token name; Expression exp;} {
+Expression Function_Call() throws Exception: {Token name; Expression exp;} {
   try {
     name = <FUNC> 
       {
         //add line number and function call to arraylist of function calls
         functionCalls.add(name.beginLine + " " + name.image);
       }
-    <LPAREN> Expression() <RPAREN>
+    <LPAREN> 
+      exp = Expression()
+      {return new FunctionCall(name.image, exp);}
+    <RPAREN>
   } catch (Exception e) { //catch error thrown for incorrect function call Format
     if (e.getMessage().contains("Wrong")) {
       throw e;

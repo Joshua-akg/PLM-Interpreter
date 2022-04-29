@@ -79,12 +79,12 @@
     }
 
     //class for function calls
-    public class Functioncall extends Expression {
+    public class FunctionCall extends Expression {
       public String functionName;
       public Expression argument;
 
-      //Functioncall constructor
-      public Functioncall(String name, Expression arg) {
+      //FunctionCall constructor
+      public FunctionCall(String name, Expression arg) {
         this.functionName = name;
         this.argument = arg;
       }
@@ -342,13 +342,14 @@
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
   final public void Function_Call() throws ParseException, Exception {
-                                        Token t;
+                                        Token name; Expression exp;
     try {
-      t = jj_consume_token(FUNC);
+      name = jj_consume_token(FUNC);
         //add line number and function call to arraylist of function calls
-        functionCalls.add(t.beginLine + " " + t.image);
+        functionCalls.add(name.beginLine + " " + name.image);
       jj_consume_token(LPAREN);
-      Expression();
+      exp = Expression();
+       {if (true) return new FunctionCall(name.image, exp);}
       jj_consume_token(RPAREN);
     } catch (Exception e) {
                           //catch error thrown for incorrect function call Format
