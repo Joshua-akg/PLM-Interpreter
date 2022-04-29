@@ -93,6 +93,22 @@
       // public String get
     }
 
+    //class for binary expressions
+    public class Binary extends Expression {
+      public Expression left;
+      public Expression right;
+      public String operator;
+
+      //Binary constructor
+      public Binary(Expression left, String op, Expression right) {
+        this.left = left;
+        this.right = right;
+        this.operator = op;
+      }
+
+      //String form with left and right operands and operator
+    }
+
 //Lexical Specification
   final public void Definition() throws ParseException, Exception {
     try {
@@ -261,10 +277,12 @@
     }
   }
 
+//split expressions into terms to preserve order of operations
 //EXPR -> TERM ADD TERM | TERM
-  final public void Expression() throws ParseException, Exception {
+  final public Expression Expression() throws ParseException, Exception {
+                                           Expression left, right;
     try {
-      Term();
+      left = Term();
       label_3:
       while (true) {
         if (jj_2_3(2)) {
@@ -273,22 +291,26 @@
           break label_3;
         }
         jj_consume_token(ADD);
-        Term();
+        right = Term();
+         left = new Binary(left, "+", right);
       }
+     {if (true) return left;}
     } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       {if (true) throw e;}
     }
 
-    //throw new excpetion with a custom message
+    //throw new exception with a custom message
     {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");}
     }
+    throw new Error("Missing return statement in function");
   }
 
 //TERM -> FACTOR MUL FACTOR | FACTOR
-  final public void Term() throws ParseException, Exception {
+  final public Expression Term() throws ParseException, Exception {
+                                     Expression left, right;
     try {
-      Factor();
+      left = Factor();
       label_4:
       while (true) {
         if (jj_2_4(2)) {
@@ -297,16 +319,19 @@
           break label_4;
         }
         jj_consume_token(MUL);
-        Factor();
+        right = Factor();
+         left = new Binary(left, "*", right);
       }
+     {if (true) return left;}
     } catch (Exception e) {
     if (e.getMessage().contains("Wrong")) {
       {if (true) throw e;}
     }
 
-    //throw new excpetion with a custom message
+    //throw new exception with a custom message
     {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");}
     }
+    throw new Error("Missing return statement in function");
   }
 
 //FACTOR -> NUM | Function | Parameter
@@ -322,6 +347,8 @@
         if (!(functionParams.peek().equals(param.image))) {
           {if (true) throw new Exception(param.beginLine+"\nWrong Parameter within function body");}
         }
+
+        {if (true) return new Parameter(param.image);}
       } else if (jj_2_7(2)) {
         num = jj_consume_token(NUM);
        {if (true) return new Number(Integer.parseInt(num.image));}
@@ -341,8 +368,8 @@
   }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
-  final public void Function_Call() throws ParseException, Exception {
-                                        Token name; Expression exp;
+  final public Expression Function_Call() throws ParseException, Exception {
+                                              Token name; Expression exp;
     try {
       name = jj_consume_token(FUNC);
         //add line number and function call to arraylist of function calls
@@ -360,6 +387,7 @@
     //throw new excpetion with a custom message
     {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Call Format");}
     }
+    throw new Error("Missing return statement in function");
   }
 
   private boolean jj_2_1(int xla) {
@@ -411,8 +439,8 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(DEFINE)) return true;
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
     return false;
   }
 
@@ -421,9 +449,8 @@
     return false;
   }
 
-  private boolean jj_3R_8() {
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
     return false;
   }
 
@@ -440,9 +467,19 @@
     return false;
   }
 
-  private boolean jj_3R_5() {
-    if (jj_3R_9()) return true;
-    if (jj_scan_token(FUNC)) return true;
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(DEFINE)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_6()) return true;
     return false;
   }
 
@@ -452,23 +489,14 @@
     return false;
   }
 
+  private boolean jj_3R_5() {
+    if (jj_3R_9()) return true;
+    if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
   private boolean jj_3_1() {
     if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_3R_7()) return true;
     return false;
   }
 
@@ -477,9 +505,9 @@
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_6()) return true;
+  private boolean jj_3R_8() {
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 

@@ -344,6 +344,8 @@ Expression Factor() throws Exception: {Token num; Expression exp; Token param;} 
         if (!(functionParams.peek().equals(param.image))) {
           throw new Exception(param.beginLine+"\nWrong Parameter within function body");
         }
+
+        return new Parameter(param.image);
       } 
 
     | num = <NUM>
