@@ -266,6 +266,7 @@ Exp function_body() throws ParseException:
 
 Exp E(): { Exp e1, e2; } { e1 = T() ("+" e2 = T() { e1 = new BinaryExp("+", e1, e2); } )* { return e1; } }
 Exp T(): { Exp e1, e2; } { e1 = F() ("*" e2 = F() { e1 = new BinaryExp("*", e1, e2); } )* { return e1; } }
+
 // Recognises function calls
 Exp function_call() throws ParseException:
 {

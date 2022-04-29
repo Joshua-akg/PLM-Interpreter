@@ -88,6 +88,9 @@
         this.functionName = name;
         this.argument = arg;
       }
+
+      //string form with parameters replaced
+      // public String get
     }
 
 //Lexical Specification
@@ -308,18 +311,20 @@
 
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
-  final public void Factor() throws ParseException, Exception {
-                                 Token t;
+  final public Expression Factor() throws ParseException, Exception {
+                                       Token num; Expression exp; Token param;
     try {
       if (jj_2_5(2)) {
-        Function_Call();
+        exp = Function_Call();
+     {if (true) return exp;}
       } else if (jj_2_6(2)) {
-        t = jj_consume_token(PARAM);
-        if (!(functionParams.peek().equals(t.image))) {
-          {if (true) throw new Exception(t.beginLine+"\nWrong Parameter within function body");}
+        param = jj_consume_token(PARAM);
+        if (!(functionParams.peek().equals(param.image))) {
+          {if (true) throw new Exception(param.beginLine+"\nWrong Parameter within function body");}
         }
       } else if (jj_2_7(2)) {
-        jj_consume_token(NUM);
+        num = jj_consume_token(NUM);
+       {if (true) return new Number(Integer.parseInt(num.image));}
       } else {
         jj_consume_token(-1);
         throw new ParseException();
@@ -332,6 +337,7 @@
       {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Expression Format");}
     }
     }
+    throw new Error("Missing return statement in function");
   }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
@@ -404,17 +410,6 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_3() {
-    if (jj_scan_token(ADD)) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
   private boolean jj_3R_9() {
     if (jj_scan_token(DEFINE)) return true;
     return false;
@@ -422,6 +417,12 @@
 
   private boolean jj_3_5() {
     if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_8() {
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
@@ -450,18 +451,7 @@
     return false;
   }
 
-  private boolean jj_3R_8() {
-    if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
   private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
     if (jj_3R_5()) return true;
     return false;
   }
@@ -471,8 +461,24 @@
     return false;
   }
 
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_scan_token(ADD)) return true;
+    if (jj_3R_6()) return true;
     return false;
   }
 

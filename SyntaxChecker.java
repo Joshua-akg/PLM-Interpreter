@@ -18,7 +18,7 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
     public static void main(String[] args) throws ParseException {
         try {
             Exp res = new SyntaxChecker(System.in).parse();
-            System.out.println("Result of parse: "+res);
+            System.out.println("Result of parse: "+res.toString());
             System.out.println("PASS");
             System.out.println(evaluatePostfix(res.toString()));
         } catch (ParseException e) {
@@ -77,14 +77,7 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
                 {if (true) throw new ParseException("A call has been made to a non-defined function.");}
             }
         }
-/*
-        for (String parameter : parametersWithinBody) {
-            if (!parametersAll.contains(parameter)) {
-                throw new ParseException("Please use the associated parameter within body.");
-            }
-        }*/
 
-        //return e;
         {if (true) return functionMap.get("MAIN").getBody();}
     throw new Error("Missing return statement in function");
   }

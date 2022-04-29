@@ -310,16 +310,20 @@ void Term() throws Exception: {} {
 
 //FACTOR -> NUM | Function | Parameter
 //add check to make sure function calls refer to defined functions in the same file
-void Factor() throws Exception: {Token t;} {
+Expression Factor() throws Exception: {Token num; Expression exp; Token param;} {
   try {
-    Function_Call() 
-    | t = <PARAM> 
+    exp = Function_Call() 
+    {return exp;}
+
+    | param = <PARAM> 
       {
-        if (!(functionParams.peek().equals(t.image))) {
-          throw new Exception(t.beginLine+"\nWrong Parameter within function body");
+        if (!(functionParams.peek().equals(param.image))) {
+          throw new Exception(param.beginLine+"\nWrong Parameter within function body");
         }
       } 
-    | <NUM>
+
+    | num = <NUM>
+      {return new Number(Integer.parseInt(num.image));}
   } catch (Exception e) {
     if (e.getMessage().contains("Wrong"))
       throw e;
@@ -331,12 +335,12 @@ void Factor() throws Exception: {Token t;} {
 }
 
 //Function_Call -> FUNC LPAREN EXPR RPAREN
-void Function_Call() throws Exception: {Token t;} {
+void Function_Call() throws Exception: {Token name; Expression exp;} {
   try {
-    t = <FUNC> 
+    name = <FUNC> 
       {
         //add line number and function call to arraylist of function calls
-        functionCalls.add(t.beginLine + " " + t.image);
+        functionCalls.add(name.beginLine + " " + name.image);
       }
     <LPAREN> Expression() <RPAREN>
   } catch (Exception e) { //catch error thrown for incorrect function call Format
