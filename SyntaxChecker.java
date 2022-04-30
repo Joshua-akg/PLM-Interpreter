@@ -18,44 +18,57 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
     public static void main(String[] args) throws ParseException {
         try {
             Exp res = new SyntaxChecker(System.in).parse();
-            System.out.println("Result of parse: "+res.toString());
-            System.out.println("PASS");
+
+            System.out.println("Result of parse: "+res);
+            System.out.println("PASS\n");
+
+            // res.toString();
+            // System.out.println();
+
             System.out.println(evaluatePostfix(res.toString()));
         } catch (ParseException e) {
             // Catching Throwable is ugly but JavaCC throws Error objects!
             System.out.println("FAIL");
-            e.printStackTrace();
+            // e.printStackTrace();
         } catch (StackOverflowError n) {
             //
             System.out.println("DIVERGENCE");
-            //n.printStackTrace();
+            // n.printStackTrace();
         }
     }
 
     public static int evaluatePostfix(String postfixExpr) {
-                    char[] chars = postfixExpr.toCharArray();
-                    Stack<Integer> stack = new Stack<Integer>();
-                    for (char c : chars) {
-                            if (isOperand(c)) {
-                                    stack.push(c - '0'); // convert char to int val
-                            } else if (isOperator(c)) {
-                                    int op1 = stack.pop();
-                                    int op2 = stack.pop();
-                                    int result;
-                                    switch (c) {
-                                    case '*':
-                                            result = op1 * op2;
-                                            stack.push(result);
-                                            break;
-                                    case '+':
-                                            result = op1 + op2;
-                                            stack.push(result);
-                                            break;
-                                    }
-                            }
-                    }
-                    return stack.pop();
+        char[] chars = postfixExpr.toCharArray();
+        Stack<Integer> stack = new Stack<Integer>();
+        char last = ' ';
+        for (char c : chars) {
+            if (isOperand(c)) {
+                if (isOperand(last))
+                    stack.push(10*(stack.pop() + (c - '0')));
+                else
+                    stack.push(c - '0'); // convert char to int val
+            } else if (isOperator(c)) {
+                int op1 = stack.pop();
+                int op2 = stack.pop();
+                int result;
+                switch (c) {
+                case '*':
+                    result = op1 * op2;
+                    stack.push(result);
+                    break;
+                case '+':
+                    result = op1 + op2;
+                    stack.push(result);
+                    break;
+                }
             }
+
+            last = c;
+            //print last 
+            // System.out.println("Previous character: "+last);
+        }
+        return stack.pop();
+    }
 
             private static boolean isOperator(char val) {
                             return operators.indexOf(val) >= 0;
@@ -491,6 +504,7 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
 class Function {
     Exp body;
     String parameter;
+    public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
     Function(Exp body, String p) { this.body = body; this.parameter = p; }
     public Exp getBody() { return body; }
     public String getParameter() { return parameter; }
@@ -517,10 +531,23 @@ class FunctionCall extends Exp {
     FunctionCall (String name, Exp argument) { this.functionName = name; this.functionArgument = argument; }
     private String replaceParameter() {
         //Function f = SyntaxChecker.functionMap.get(functionName);
+
+        if (Function.calls.search(this) > -1) {
+            System.out.println("CYCLE DETECTED");
+            throw new StackOverflowError("CYCLE DETECTED");
+        }
+
+        Function.calls.push(this);
+        //(functionName);
+
         String body = SyntaxChecker.functionMap.get(functionName).getBody().toString();
         String parameter = SyntaxChecker.functionMap.get(functionName).getParameter();
         String x = "";
         x = body.replaceAll(parameter, functionArgument.toString());
+
+        Function.calls.pop();
+        // System.out.println("function - " + functionName + " - argument - " + functionArgument.toString());
+
         return x;
     }
     public String toString() { return replaceParameter(); }

@@ -49,7 +49,7 @@ PARSER_BEGIN(Assignment)
         this.body = body;
       }
 
-      //getters, return the function details - not sure it's needed since it's public
+      //getters, return the function datails - not sure it's needed since it's public
       public String getParam() {
         return param;
       }
