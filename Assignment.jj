@@ -42,6 +42,7 @@ PARSER_BEGIN(Assignment)
     public class Function {
       public String param;
       public Expression body;
+      public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
       //Function constructor
       public Function(String param, Expression body) {
@@ -63,13 +64,17 @@ PARSER_BEGIN(Assignment)
     public abstract class Expression {}
 
     //create classes for the different types of expressions - numbers, parameters, functioncalls
-    
     //class for numbers
     public class Number extends Expression {
       public int value;
 
       public Number(int value) {
         this.value = value;
+      }
+
+      //toString method for numbers
+      public String toString() {
+        return "" + value;
       }
     }
 
@@ -80,6 +85,11 @@ PARSER_BEGIN(Assignment)
       //Parameter constructor
       public Parameter(String param) {
         this.param = param;
+      }
+
+      //toString method for parameters
+      public String toString() {
+        return param;
       }
     }
 
@@ -94,8 +104,23 @@ PARSER_BEGIN(Assignment)
         this.argument = arg;
       }
 
-      //string form with parameters replaced
-      // public String get
+      public String toString() {
+        if (Function.calls.search(this) > -1) {
+          System.out.println("Error: Recursive function call");
+          throw new Error("Recursive function call");
+        }
+
+        Function.calls.push(this);
+
+        String functionBody = functionDetails.get(functionName).getBody().toString();
+        String functionParam = functionDetails.get(functionName).getParam();
+        
+        String result = functionBody.replaceAll(functionParam, argument.toString());
+
+        Function.calls.pop();
+
+        return result;
+      }
     }
 
     //class for binary expressions
