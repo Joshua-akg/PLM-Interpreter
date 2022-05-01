@@ -231,7 +231,7 @@ Expression Program() throws Exception: {Token t; double result;} {
 }
 
 //Main -> MAIN FunctionBody
-Expression Main() throws Exception: {} {
+Expression Main() throws Exception: {Expression ex;} {
   Definition()
   try {
     <MAIN>
@@ -251,7 +251,8 @@ Expression Main() throws Exception: {} {
   }
 
   try {
-    FunctionBody()
+    ex = FunctionBody()
+    {return ex;}
   } catch (Exception e) { //Catch error thrown for incorrect main function Format
     if (e.getMessage().contains("Wrong"))
       throw e;
@@ -261,7 +262,7 @@ Expression Main() throws Exception: {} {
 }
 
 //Function -> FUNC PARAM FunctionBody
-Expression Function() throws Exception:{ String functionName = ""; Token t; Token p;} {
+Expression Function() throws Exception:{ String functionName = ""; Token t; Token p; Expression ex;} {
   Definition()
   try {
     t = <FUNC> 
@@ -278,7 +279,8 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
     p = <PARAM> 
     {functionParams.push(p.image);} 
 
-    FunctionBody()
+    ex = FunctionBody()
+    {return ex;}
   } catch (Exception e) { //Catch error thrown for missing function name
     if (e.getMessage().contains("Wrong")) {
       throw e;
@@ -300,12 +302,10 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
 Expression FunctionBody() throws Exception: {Expression ex} {
   try {
   <SPACE> <LBRACE> <SPACE> 
-  ex = Expression() 
+  ex = Expression()
   <SPACE> <RBRACE> <SPACE>
   {return ex;}
   } catch (Exception e) { //Catch error thrown for wrong expression
-    //extract line number from Exception
-
     if (e.getMessage().contains("Wrong"))
       throw e;
 
