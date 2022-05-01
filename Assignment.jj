@@ -297,9 +297,12 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
 }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
-Expression FunctionBody() throws Exception: {} {
+Expression FunctionBody() throws Exception: {Expression ex} {
   try {
-  <SPACE> <LBRACE> <SPACE> Expression() <SPACE> <RBRACE> <SPACE>
+  <SPACE> <LBRACE> <SPACE> 
+  ex = Expression() 
+  <SPACE> <RBRACE> <SPACE>
+  {return ex;}
   } catch (Exception e) { //Catch error thrown for wrong expression
     //extract line number from Exception
 
@@ -348,7 +351,7 @@ Expression Term() throws Exception: {Expression left, right;} {
   try {
     left = Factor() 
       ( 
-        <MUL> right = Factor()
+        <MUL> right = Fact or()
         {left = new Binary(left, "*", right);}
       )*
     {return left;}
