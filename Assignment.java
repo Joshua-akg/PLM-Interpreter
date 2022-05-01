@@ -13,8 +13,11 @@
 
     public static void main(String args []) throws Throwable {
       try {
-        new Assignment(System.in).Program();
+        Expression finalExpression = new Assignment(System.in).Program();
         System.out.println("Syntax is okay: PASS");
+
+        //print out the final expression
+        System.out.println("Final: "+finalExpression);
       } catch (Throwable e) {
         System.out.println("Syntax error detected: FAIL");
 
@@ -38,13 +41,16 @@
       public String param;
       public Expression body;
 
+
+      public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
+
       //Function constructor
       public Function(String param, Expression body) {
         this.param = param;
         this.body = body;
       }
 
-      //getters, return the function details - not sure it's needed since it's public
+      //getters, return the function datails - not sure it's needed since it's public
       public String getParam() {
         return param;
       }
@@ -58,13 +64,17 @@
     public abstract class Expression {}
 
     //create classes for the different types of expressions - numbers, parameters, functioncalls
-
     //class for numbers
     public class Number extends Expression {
       public int value;
 
       public Number(int value) {
         this.value = value;
+      }
+
+      //toString method for numbers
+      public String toString() {
+        return "" + value;
       }
     }
 
@@ -75,6 +85,11 @@
       //Parameter constructor
       public Parameter(String param) {
         this.param = param;
+      }
+
+      //toString method for parameters
+      public String toString() {
+        return param;
       }
     }
 
@@ -89,8 +104,24 @@
         this.argument = arg;
       }
 
-      //string form with parameters replaced
-      // public String get
+      public String toString() {
+        if (Function.calls.search(this) > -1) {
+          System.out.println("Error: Recursive function call");
+          throw new Error("Recursive function call");
+        }
+
+        Function.calls.push(this);
+
+        String functionBody = functionDetails.get(functionName).getBody().toString();
+        String functionParam = functionDetails.get(functionName).getParam();
+
+        String result = functionBody.replaceAll(functionParam, argument.toString());
+
+        //comment later
+        Function.calls.pop();
+
+        return result;
+      }
     }
 
     //class for binary expressions
@@ -101,12 +132,14 @@
 
       //Binary constructor
       public Binary(Expression left, String op, Expression right) {
-        this.left = left;
-        this.right = right;
+        this.left = left; this.right = right;
         this.operator = op;
       }
 
       //String form with left and right operands and operator
+      public String toString() {
+        return "(" + left.toString() + "|" + right.toString() + operator + ")";
+      }
     }
 
 //Lexical Specification
@@ -126,8 +159,8 @@
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
-  final public void Program() throws ParseException, Exception {
-                                  Token t; double result;
+  final public Expression Program() throws ParseException, Exception {
+                                        Token t; double result;
     label_1:
     while (true) {
       if (jj_2_1(2)) {
@@ -177,10 +210,13 @@
 
     {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");}
     }
+   {if (true) return functionDetails.get("MAIN").getBody();}
+    throw new Error("Missing return statement in function");
   }
 
 //Main -> MAIN FunctionBody
-  final public void Main() throws ParseException, Exception {
+  final public Expression Main() throws ParseException, Exception {
+                                     Expression ex;
     Definition();
     try {
       jj_consume_token(MAIN);
@@ -198,7 +234,9 @@
     {if (true) throw new Exception("0\nWrong Program Structure - Missing Main Function");}
     }
     try {
-      FunctionBody();
+      ex = FunctionBody();
+      functionDetails.put("MAIN", new Function("MAIN","",ex));
+      {if (true) return ex;}
     } catch (Exception e) {
                           //Catch error thrown for incorrect main function Format
     if (e.getMessage().contains("Wrong"))
@@ -206,11 +244,12 @@
 
     {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Main Function Format");}
     }
+    throw new Error("Missing return statement in function");
   }
 
 //Function -> FUNC PARAM FunctionBody
-  final public void Function() throws ParseException, Exception {
-                                   String functionName = ""; Token t; Token p;
+  final public Expression Function() throws ParseException, Exception {
+                                         String functionName = ""; Token t; Token p; Expression ex;
     Definition();
     try {
       t = jj_consume_token(FUNC);
@@ -224,7 +263,9 @@
       jj_consume_token(SPACE);
       p = jj_consume_token(PARAM);
      functionParams.push(p.image);
-      FunctionBody();
+      ex = FunctionBody();
+      functionDetails.put(functionName, new Function(functionName, p.image, ex));
+      {if (true) return ex;}
     } catch (Exception e) {
                           //Catch error thrown for missing function name
     if (e.getMessage().contains("Wrong")) {
@@ -241,22 +282,23 @@
     //throw new excpetion with a custom message
     {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");}
     }
+    throw new Error("Missing return statement in function");
   }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
-  final public void FunctionBody() throws ParseException, Exception {
+  final public Expression FunctionBody() throws ParseException, Exception {
+                                             Expression ex;
     try {
       jj_consume_token(SPACE);
       jj_consume_token(LBRACE);
       jj_consume_token(SPACE);
-      Expression();
+      ex = Expression();
       jj_consume_token(SPACE);
       jj_consume_token(RBRACE);
       jj_consume_token(SPACE);
+     {if (true) return ex;}
     } catch (Exception e) {
                           //Catch error thrown for wrong expression
-    //extract line number from Exception
-
     if (e.getMessage().contains("Wrong"))
       {if (true) throw e;}
 
@@ -275,6 +317,7 @@
     //throw new excpetion with a custom message
     {if (true) throw new Exception(lineNumber+"\nWrong function terminator");}
     }
+    throw new Error("Missing return statement in function");
   }
 
 //split expressions into terms to preserve order of operations
@@ -439,6 +482,17 @@
     finally { jj_save(6, xla); }
   }
 
+  private boolean jj_3R_9() {
+    if (jj_scan_token(DEFINE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_8() {
+    if (jj_scan_token(FUNC)) return true;
+    if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
     return false;
@@ -446,11 +500,6 @@
 
   private boolean jj_3_5() {
     if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_5()) return true;
     return false;
   }
 
@@ -467,13 +516,13 @@
     return false;
   }
 
-  private boolean jj_3_7() {
-    if (jj_scan_token(NUM)) return true;
+  private boolean jj_3_1() {
+    if (jj_3R_5()) return true;
     return false;
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(DEFINE)) return true;
+  private boolean jj_3_7() {
+    if (jj_scan_token(NUM)) return true;
     return false;
   }
 
@@ -489,13 +538,7 @@
     return false;
   }
 
-  private boolean jj_3R_5() {
-    if (jj_3R_9()) return true;
-    if (jj_scan_token(FUNC)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
+  private boolean jj_3_2() {
     if (jj_3R_5()) return true;
     return false;
   }
@@ -505,9 +548,9 @@
     return false;
   }
 
-  private boolean jj_3R_8() {
+  private boolean jj_3R_5() {
+    if (jj_3R_9()) return true;
     if (jj_scan_token(FUNC)) return true;
-    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 

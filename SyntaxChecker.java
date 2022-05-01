@@ -146,7 +146,6 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
             // Add the function name to the arraylist of functions
             else {
                 functions.add(functionName);
-                fMap.put(functionName, fbody);
                 functionMap.put(functionName, new Function(fbody, p));
             }
       try {
@@ -530,8 +529,6 @@ class FunctionCall extends Exp {
     Exp functionArgument;
     FunctionCall (String name, Exp argument) { this.functionName = name; this.functionArgument = argument; }
     private String replaceParameter() {
-        //Function f = SyntaxChecker.functionMap.get(functionName);
-
         if (Function.calls.search(this) > -1) {
             System.out.println("CYCLE DETECTED");
             throw new StackOverflowError("CYCLE DETECTED");

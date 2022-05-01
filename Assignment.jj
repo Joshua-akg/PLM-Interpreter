@@ -18,8 +18,11 @@ PARSER_BEGIN(Assignment)
 
     public static void main(String args []) throws Throwable {
       try {
-        new Assignment(System.in).Program();
+        Expression finalExpression = new Assignment(System.in).Program();
         System.out.println("Syntax is okay: PASS");
+        
+        //print out the final expression
+        System.out.println("Final: "+finalExpression);
       } catch (Throwable e) {
         System.out.println("Syntax error detected: FAIL");
         
@@ -42,7 +45,6 @@ PARSER_BEGIN(Assignment)
     public class Function {
       public String param;
       public Expression body;
-
 
       public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
@@ -228,6 +230,9 @@ Expression Program() throws Exception: {Token t; double result;} {
 
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
   }
+
+  //return the result of the main function
+  {return functionDetails.get("MAIN").getBody();}
 }
 
 //Main -> MAIN FunctionBody
@@ -252,7 +257,10 @@ Expression Main() throws Exception: {Expression ex;} {
 
   try {
     ex = FunctionBody()
-    {return ex;}
+    {
+      functionDetails.put("MAIN", new Function("",ex));
+      return ex;
+    }
   } catch (Exception e) { //Catch error thrown for incorrect main function Format
     if (e.getMessage().contains("Wrong"))
       throw e;
@@ -280,7 +288,10 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
     {functionParams.push(p.image);} 
 
     ex = FunctionBody()
-    {return ex;}
+    {
+      functionDetails.put(functionName, new Function(p.image, ex));
+      return ex;
+    }
   } catch (Exception e) { //Catch error thrown for missing function name
     if (e.getMessage().contains("Wrong")) {
       throw e;
@@ -299,12 +310,12 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
 }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
-Expression FunctionBody() throws Exception: {Expression ex} {
+Expression FunctionBody() throws Exception: {Expression ex;} {
   try {
-  <SPACE> <LBRACE> <SPACE> 
-  ex = Expression()
-  <SPACE> <RBRACE> <SPACE>
-  {return ex;}
+    <SPACE> <LBRACE> <SPACE> 
+      ex = Expression()
+    <SPACE> <RBRACE> <SPACE>
+    {return ex;}
   } catch (Exception e) { //Catch error thrown for wrong expression
     if (e.getMessage().contains("Wrong"))
       throw e;
@@ -351,7 +362,7 @@ Expression Term() throws Exception: {Expression left, right;} {
   try {
     left = Factor() 
       ( 
-        <MUL> right = Fact or()
+        <MUL> right = Factor()
         {left = new Binary(left, "*", right);}
       )*
     {return left;}
