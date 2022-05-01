@@ -8,9 +8,9 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
     public static ArrayList<String> parametersAll = new ArrayList<String>();
     public static ArrayList<String> parametersWithinBody = new ArrayList<String>();
 
-
     public static HashMap<String, Function> functionMap = new HashMap<String, Function>();
 
+    public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
     // MAKE A HASHMAP FUNCTIONAME - PARAM NAME or smth
     private static final String operators = "+*";
@@ -70,13 +70,13 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
         return stack.pop();
     }
 
-            private static boolean isOperator(char val) {
-                            return operators.indexOf(val) >= 0;
-            }
+    private static boolean isOperator(char val) {
+                    return operators.indexOf(val) >= 0;
+    }
 
-            private static boolean isOperand(char val) {
-                            return operands.indexOf(val) >= 0;
-            }
+    private static boolean isOperand(char val) {
+                    return operands.indexOf(val) >= 0;
+    }
 
   static final public Exp parse() throws ParseException {
     start();
@@ -195,6 +195,10 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
           {if (true) return exp;}
     } catch (ParseException e) {
         System.err.println("[PARSING ERROR] Incorrect function body formatting.");
+
+        //print printStackTrace
+        e.printStackTrace();
+
         {if (true) throw e;}
         System.exit(0);
     }
@@ -503,7 +507,7 @@ public class SyntaxChecker implements SyntaxCheckerConstants {
 class Function {
     Exp body;
     String parameter;
-    public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
+
     Function(Exp body, String p) { this.body = body; this.parameter = p; }
     public Exp getBody() { return body; }
     public String getParameter() { return parameter; }
@@ -529,12 +533,12 @@ class FunctionCall extends Exp {
     Exp functionArgument;
     FunctionCall (String name, Exp argument) { this.functionName = name; this.functionArgument = argument; }
     private String replaceParameter() {
-        if (Function.calls.search(this) > -1) {
+        if (SyntaxChecker.calls.search(this) > -1) {
             System.out.println("CYCLE DETECTED");
             throw new StackOverflowError("CYCLE DETECTED");
         }
 
-        Function.calls.push(this);
+        SyntaxChecker.calls.push(this);
         //(functionName);
 
         String body = SyntaxChecker.functionMap.get(functionName).getBody().toString();
@@ -542,7 +546,7 @@ class FunctionCall extends Exp {
         String x = "";
         x = body.replaceAll(parameter, functionArgument.toString());
 
-        Function.calls.pop();
+        SyntaxChecker.calls.pop();
         // System.out.println("function - " + functionName + " - argument - " + functionArgument.toString());
 
         return x;

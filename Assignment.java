@@ -5,6 +5,8 @@
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
 
+    public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
+
     //create new stack for function parameters to make sure function bodies only used corresponding parameters
     public static Stack<String> functionParams = new Stack<String>();
 
@@ -18,6 +20,7 @@
 
         //print out the final expression
         System.out.println("Final: "+finalExpression);
+        System.out.println("After evaluation: "+expressionEvaluator(finalExpression.toString()));
       } catch (Throwable e) {
         System.out.println("Syntax error detected: FAIL");
 
@@ -26,8 +29,41 @@
           System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
         } else
             System.err.println(e.getMessage());
-        // e.printStackTrace();
       }
+    }
+
+    //evaluator for the final expression
+    public static int expressionEvaluator(String finalExpression) {
+      String numbers = "0123456789";
+      String op = "*+";
+
+      char[] characters = finalExpression.toCharArray();
+      Stack<Integer> intStack = new Stack<Integer>();
+      char last = ' ';
+
+      for (char ch : characters) {
+        // System.out.println("Current char: "+ch);
+        if (numbers.contains(ch+"")) {
+          if (numbers.contains(last+"")) {
+            intStack.push(10*(intStack.pop() + (ch - '0')));
+          } else
+            intStack.push(ch - '0'); // convert char to int val
+        } else if (op.contains(ch+"")) {
+          int num1 = intStack.pop();
+          int num2 = intStack.pop();
+          int result;
+
+          if (ch == '+') {
+            result = num1 + num2;
+            intStack.push(result);
+          } else {
+            result = num1 * num2;
+            intStack.push(result);
+          }
+        }
+        last = ch;
+      }
+      return intStack.pop();
     }
 
     //function to retrieve line number from string message
@@ -40,9 +76,6 @@
     public class Function {
       public String param;
       public Expression body;
-
-
-      public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
       //Function constructor
       public Function(String param, Expression body) {
@@ -105,12 +138,12 @@
       }
 
       public String toString() {
-        if (Function.calls.search(this) > -1) {
+        if (calls.search(this) > -1) {
           System.out.println("Error: Recursive function call");
           throw new Error("Recursive function call");
         }
 
-        Function.calls.push(this);
+        calls.push(this);
 
         String functionBody = functionDetails.get(functionName).getBody().toString();
         String functionParam = functionDetails.get(functionName).getParam();
@@ -118,7 +151,7 @@
         String result = functionBody.replaceAll(functionParam, argument.toString());
 
         //comment later
-        Function.calls.pop();
+        calls.pop();
 
         return result;
       }
@@ -208,7 +241,7 @@
       {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Program Structure - Duplicate Main Function");}
     }
 
-    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");}
+    {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Naame Format");}
     }
    {if (true) return functionDetails.get("MAIN").getBody();}
     throw new Error("Missing return statement in function");
@@ -235,7 +268,18 @@
     }
     try {
       ex = FunctionBody();
-      functionDetails.put("MAIN", new Function("MAIN","",ex));
+      try {
+        jj_consume_token(SCOLON);
+        jj_consume_token(EOL);
+      } catch (Exception e) {
+                            //Catch error thrown for wrong line terminator
+      if (e.getMessage().contains("Wrong"))
+        {if (true) throw e;}
+
+      //throw new excpetion with a custom message
+      {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong function terminator");}
+      }
+      functionDetails.put("MAIN", new Function("",ex));
       {if (true) return ex;}
     } catch (Exception e) {
                           //Catch error thrown for incorrect main function Format
@@ -264,7 +308,18 @@
       p = jj_consume_token(PARAM);
      functionParams.push(p.image);
       ex = FunctionBody();
-      functionDetails.put(functionName, new Function(functionName, p.image, ex));
+      try {
+        jj_consume_token(SCOLON);
+        jj_consume_token(EOL);
+      } catch (Exception e) {
+                            //Catch error thrown for wrong line terminator
+      if (e.getMessage().contains("Wrong"))
+        {if (true) throw e;}
+
+      //throw new excpetion with a custom message
+      {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong function terminator");}
+      }
+      functionDetails.put(functionName, new Function(p.image, ex));
       {if (true) return ex;}
     } catch (Exception e) {
                           //Catch error thrown for missing function name
@@ -303,19 +358,6 @@
       {if (true) throw e;}
 
     {if (true) throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Body Format");}
-    }
-    jj_consume_token(SCOLON);
-    try {
-      jj_consume_token(EOL);
-    } catch (Exception e) {
-                          //Catch error thrown for wrong line terminator
-    if (e.getMessage().contains("Wrong"))
-      {if (true) throw e;}
-
-    int lineNumber = getLineNumber(e.getMessage());
-
-    //throw new excpetion with a custom message
-    {if (true) throw new Exception(lineNumber+"\nWrong function terminator");}
     }
     throw new Error("Missing return statement in function");
   }
@@ -419,8 +461,8 @@
         functionCalls.add(name.beginLine + " " + name.image);
       jj_consume_token(LPAREN);
       exp = Expression();
-       {if (true) return new FunctionCall(name.image, exp);}
       jj_consume_token(RPAREN);
+     {if (true) return new FunctionCall(name.image, exp);}
     } catch (Exception e) {
                           //catch error thrown for incorrect function call Format
     if (e.getMessage().contains("Wrong")) {
@@ -482,8 +524,8 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(DEFINE)) return true;
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 
@@ -503,6 +545,11 @@
     return false;
   }
 
+  private boolean jj_3_2() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
   private boolean jj_3R_7() {
     Token xsp;
     xsp = jj_scanpos;
@@ -516,8 +563,8 @@
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_5()) return true;
+  private boolean jj_3R_9() {
+    if (jj_scan_token(DEFINE)) return true;
     return false;
   }
 
@@ -538,13 +585,8 @@
     return false;
   }
 
-  private boolean jj_3_2() {
+  private boolean jj_3_1() {
     if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 

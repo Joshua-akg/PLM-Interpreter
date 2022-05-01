@@ -10,6 +10,8 @@ PARSER_BEGIN(Assignment)
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
     
+    public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
+
     //create new stack for function parameters to make sure function bodies only used corresponding parameters
     public static Stack<String> functionParams = new Stack<String>();
 
@@ -23,16 +25,54 @@ PARSER_BEGIN(Assignment)
         
         //print out the final expression
         System.out.println("Final: "+finalExpression);
+        System.out.println("After evaluation: "+expressionEvaluator(finalExpression.toString()));
       } catch (Throwable e) {
-        System.out.println("Syntax error detected: FAIL");
-        
-        //check if e is an instance of error
-        if (e instanceof Error) {
-          System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
-        } else 
-            System.err.println(e.getMessage());
-        // e.printStackTrace();
+        if e.getMessage().contains("Recursive")
+          System.out.println("DIVERGENCE");
+        else {
+          System.out.println("Syntax error detected: FAIL");
+          
+          //check if e is an instance of error
+          if (e instanceof Error) {
+            System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
+          } else 
+              System.err.println(e.getMessage());
+        }
       }  
+    }
+
+    //evaluator for the final expression
+    public static int expressionEvaluator(String finalExpression) {
+      String numbers = "0123456789";
+      String op = "*+";
+
+      char[] characters = finalExpression.toCharArray();
+      Stack<Integer> intStack = new Stack<Integer>();
+      char last = ' ';
+
+      for (char ch : characters) {
+        // System.out.println("Current char: "+ch);
+        if (numbers.contains(ch+"")) {
+          if (numbers.contains(last+"")) {
+            intStack.push(10*(intStack.pop() + (ch - '0')));
+          } else
+            intStack.push(ch - '0'); // convert char to int val
+        } else if (op.contains(ch+"")) {
+          int num1 = intStack.pop();
+          int num2 = intStack.pop();
+          int result;
+          
+          if (ch == '+') {
+            result = num1 + num2; 
+            intStack.push(result);
+          } else {
+            result = num1 * num2;
+            intStack.push(result);
+          }
+        }
+        last = ch;
+      }
+      return intStack.pop();
     }
     
     //function to retrieve line number from string message
@@ -45,8 +85,6 @@ PARSER_BEGIN(Assignment)
     public class Function {
       public String param;
       public Expression body;
-
-      public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
       //Function constructor
       public Function(String param, Expression body) {
@@ -109,12 +147,12 @@ PARSER_BEGIN(Assignment)
       }
 
       public String toString() {
-        if (Function.calls.search(this) > -1) {
+        if (calls.search(this) > -1) {
           System.out.println("Error: Recursive function call");
           throw new Error("Recursive function call");
         }
 
-        Function.calls.push(this);
+        calls.push(this);
 
         String functionBody = functionDetails.get(functionName).getBody().toString();
         String functionParam = functionDetails.get(functionName).getParam();
@@ -122,7 +160,7 @@ PARSER_BEGIN(Assignment)
         String result = functionBody.replaceAll(functionParam, argument.toString());
 
         //comment later
-        Function.calls.pop();
+        calls.pop();
 
         return result;
       }
@@ -228,7 +266,7 @@ Expression Program() throws Exception: {Token t; double result;} {
       throw new Exception(getLineNumber(e.getMessage())+"\nWrong Program Structure - Duplicate Main Function");
     }
 
-    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
+    throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Naame Format");
   }
 
   //return the result of the main function
@@ -257,6 +295,17 @@ Expression Main() throws Exception: {Expression ex;} {
 
   try {
     ex = FunctionBody()
+
+    try {
+      <SCOLON> <EOL>
+    } catch (Exception e) { //Catch error thrown for wrong line terminator
+      if (e.getMessage().contains("Wrong"))
+        throw e;
+
+      //throw new excpetion with a custom message
+      throw new Exception(getLineNumber(e.getMessage())+"\nWrong function terminator");
+    }
+
     {
       functionDetails.put("MAIN", new Function("",ex));
       return ex;
@@ -288,6 +337,17 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
     {functionParams.push(p.image);} 
 
     ex = FunctionBody()
+
+    try {
+      <SCOLON> <EOL>
+    } catch (Exception e) { //Catch error thrown for wrong line terminator
+      if (e.getMessage().contains("Wrong"))
+        throw e;
+
+      //throw new excpetion with a custom message
+      throw new Exception(getLineNumber(e.getMessage())+"\nWrong function terminator");
+    }
+
     {
       functionDetails.put(functionName, new Function(p.image, ex));
       return ex;
@@ -321,19 +381,6 @@ Expression FunctionBody() throws Exception: {Expression ex;} {
       throw e;
 
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Body Format");
-  }  
-    <SCOLON> //might give its own try-catch
-
-  try {
-    <EOL>
-  } catch (Exception e) { //Catch error thrown for wrong line terminator
-    if (e.getMessage().contains("Wrong"))
-      throw e;
-    
-    int lineNumber = getLineNumber(e.getMessage());
-
-    //throw new excpetion with a custom message
-    throw new Exception(lineNumber+"\nWrong function terminator");
   }
 }
 
@@ -414,8 +461,8 @@ Expression Function_Call() throws Exception: {Token name; Expression exp;} {
       }
     <LPAREN> 
       exp = Expression()
-      {return new FunctionCall(name.image, exp);}
     <RPAREN>
+    {return new FunctionCall(name.image, exp);}
   } catch (Exception e) { //catch error thrown for incorrect function call Format
     if (e.getMessage().contains("Wrong")) {
       throw e;
