@@ -42,6 +42,8 @@ PARSER_BEGIN(Assignment)
     public class Function {
       public String param;
       public Expression body;
+
+
       public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
       //Function constructor
@@ -117,6 +119,7 @@ PARSER_BEGIN(Assignment)
         
         String result = functionBody.replaceAll(functionParam, argument.toString());
 
+        //comment later
         Function.calls.pop();
 
         return result;
@@ -131,12 +134,14 @@ PARSER_BEGIN(Assignment)
 
       //Binary constructor
       public Binary(Expression left, String op, Expression right) {
-        this.left = left;
-        this.right = right;
+        this.left = left; this.right = right;
         this.operator = op;
       }
 
       //String form with left and right operands and operator
+      public String toString() {
+        return "(" + left.toString() + "|" + right.toString() + operator + ")";
+      }
     }
   }
 PARSER_END(Assignment)
@@ -183,7 +188,7 @@ void Definition() throws Exception: {} {
 
 //Program consists of one main function and a series of function definitions in any order
 //Program -> Function* Main Function*
-void Program() throws Exception: {Token t; double result;} {
+Expression Program() throws Exception: {Token t; double result;} {
   (Function())* 
   
   try {
@@ -226,7 +231,7 @@ void Program() throws Exception: {Token t; double result;} {
 }
 
 //Main -> MAIN FunctionBody
-void Main() throws Exception: {} {
+Expression Main() throws Exception: {} {
   Definition()
   try {
     <MAIN>
@@ -256,7 +261,7 @@ void Main() throws Exception: {} {
 }
 
 //Function -> FUNC PARAM FunctionBody
-void Function() throws Exception:{ String functionName = ""; Token t; Token p;} {
+Expression Function() throws Exception:{ String functionName = ""; Token t; Token p;} {
   Definition()
   try {
     t = <FUNC> 
@@ -292,7 +297,7 @@ void Function() throws Exception:{ String functionName = ""; Token t; Token p;} 
 }
 
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
-void FunctionBody() throws Exception: {} {
+Expression FunctionBody() throws Exception: {} {
   try {
   <SPACE> <LBRACE> <SPACE> Expression() <SPACE> <RBRACE> <SPACE>
   } catch (Exception e) { //Catch error thrown for wrong expression
