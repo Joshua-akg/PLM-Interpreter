@@ -6,10 +6,6 @@ options{
 PARSER_BEGIN(Assignment)
   import java.util.*;
   public class Assignment{
-    public static final String TEXT_RESET = "\u001B[0m";
-    public static final String TEXT_RED = "\u001B[31m";
-    public static final String TEXT_GREEN = "\u001B[32m";
-
     //Arraylist for function names and calls to make sure all calls are to functions in the program
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
@@ -28,24 +24,24 @@ PARSER_BEGIN(Assignment)
         Expression finalExpression = new Assignment(System.in).Program();
 
         //print the result of parsing the PLM
-        System.out.println(TEXT_GREEN + "PASS" + TEXT_RESET);
+        System.out.println("PASS");
         
         //print the result of evaluating the PLM
-        System.out.println(TEXT_GREEN + expressionEvaluator(finalExpression.toString()) + TEXT_RESET);
+        System.out.println(expressionEvaluator(finalExpression.toString()));
       } catch (Throwable e) {
         //catch errors thrown from programs which do not evaluate to a number
         if (e.getMessage().contains("Recursive"))
-          System.out.println(TEXT_GREEN + "DIVERGENCE" + TEXT_RESET);
+          System.out.println("DIVERGENCE");
         else {
           //print the result of parsing the PLM
-          System.out.println(TEXT_GREEN + "FAIL" + TEXT_RESET);
+          System.out.println("FAIL");
           
           //check if e is an error vs an exception, which would be thrown if a non-token is found
           if (e instanceof Error) {
-            System.err.println(TEXT_RED + getLineNumber(e.getMessage())+"\nWrong character - Non-token found" + TEXT_RESET);
+            System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
           } else
             //Otherwise print whatever exception was thrown by the parser
-              System.err.println(TEXT_RED + e.getMessage() + TEXT_RESET);
+              System.err.println(e.getMessage());
         }
       }  
     }
@@ -469,6 +465,7 @@ Expression Term() throws Exception: {Expression left, right;} {
       )*
     {return left;}
   } catch (Exception e) {
+    //propagate exceptions thrown
     if (e.getMessage().contains("Wrong")) {
       throw e;
     }
@@ -482,11 +479,14 @@ Expression Term() throws Exception: {Expression left, right;} {
 //add check to make sure function calls refer to defined functions in the same file
 Expression Factor() throws Exception: {Token num; Expression exp; Token param;} {
   try {
+    //set expression to the function call
     exp = Function_Call() 
     {return exp;}
 
     | param = <PARAM> 
       {
+        //check that the parameter is the last parameter added for a function
+        //making sure that the parameter in the expression is the same one defined for the function 
         if (!(functionParams.peek().equals(param.image))) {
           throw new Exception(param.beginLine+"\nWrong Parameter within function body");
         }
@@ -511,10 +511,11 @@ Expression Function_Call() throws Exception: {Token name; Expression exp;} {
   try {
     name = <FUNC> 
       {
-        //add line number and function call to arraylist of function calls
+        //add line number and function name to arraylist of function calls
         functionCalls.add(name.beginLine + " " + name.image);
       }
     <LPAREN> 
+    //set expression to the expression within the function call
       exp = Expression()
     <RPAREN>
     {return new FunctionCall(name.image, exp);}
