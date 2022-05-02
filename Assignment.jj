@@ -100,12 +100,14 @@ PARSER_BEGIN(Assignment)
     
     //function to retrieve line number from string message
     public static int getLineNumber(String exceptionMessage) {
+      //find where the message says "line" and then get the number after it
       String temp = exceptionMessage.substring(exceptionMessage.indexOf("line")+5, exceptionMessage.indexOf(","));
       return Integer.parseInt(temp);
     }
 
     //create a class to represent functions
     public class Function {
+      //functions consists of parameters and a body which is an expression
       public String param;
       public Expression body;
 
@@ -126,18 +128,20 @@ PARSER_BEGIN(Assignment)
     }
 
     //create a class to represent expressions
+    //declare as abstract since expressions come in multiple types
     public abstract class Expression {}
 
     //create classes for the different types of expressions - numbers, parameters, functioncalls
     //class for numbers
     public class Number extends Expression {
+      //declare the integer value of the number
       public int value;
 
       public Number(int value) {
         this.value = value;
       }
 
-      //toString method for numbers
+      //toString method for numbers - produces the string representation of a number
       public String toString() {
         return "" + value;
       }
@@ -145,6 +149,7 @@ PARSER_BEGIN(Assignment)
 
     //class for parameters
     public class Parameter extends Expression {
+      //declare the parameter name
       public String param;
 
       //Parameter constructor
@@ -152,7 +157,7 @@ PARSER_BEGIN(Assignment)
         this.param = param;
       }
 
-      //toString method for parameters
+      //toString method for parameters - produces the string representation of a parameter
       public String toString() {
         return param;
       }
@@ -160,6 +165,7 @@ PARSER_BEGIN(Assignment)
 
     //class for function calls
     public class FunctionCall extends Expression {
+      //declare the function name and the argument expression of the function call
       public String functionName;
       public Expression argument;
 
@@ -169,40 +175,51 @@ PARSER_BEGIN(Assignment)
         this.argument = arg;
       }
 
+      //toString method for function calls - produces the string representation of a function call
       public String toString() {
+        //search the call stack to see if a function call has already been made
+        //meaning there would be a cycle and the expression produced does not evaluate to a number
         if (calls.search(this) > -1) {
-          // System.out.println("Error: Recursive function call");
           throw new Error("Wrong Recursive function call");
         }
 
+        //if the function call is not in the call stack, add it to the stack
         calls.push(this);
 
+        //get the string representation of the function body and parameter 
         String functionBody = functionDetails.get(functionName).getBody().toString();
         String functionParam = functionDetails.get(functionName).getParam();
         
+        //replace the parameter in the function body with the argument
         String result = functionBody.replaceAll(functionParam, argument.toString());
 
-        //comment later
+        //after retrieving the expression which the function call produces
+        //remove it from the stack
+        //so it may be called again from other functions without creating a cycle
         calls.pop();
 
+        //return the expression created by the function call
         return result;
       }
     }
 
     //class for binary expressions
     public class Binary extends Expression {
+      //declare the expressions and the operator which a binary expression consists of
       public Expression left;
       public Expression right;
       public String operator;
 
-      //Binary constructor
+      //Binary expression constructor
       public Binary(Expression left, String op, Expression right) {
         this.left = left; this.right = right;
         this.operator = op;
       }
 
-      //String form with left and right operands and operator
+      //Return the String form with left and right operands and operator
       public String toString() {
+        //return the string representations of the left and right operands and operator
+        //returned in this order (post-fix) to allow for post-fix evaluation
         return "(" + left.toString() + "|" + right.toString() + operator + ")";
       }
     }
