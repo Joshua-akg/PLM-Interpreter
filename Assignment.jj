@@ -10,6 +10,7 @@ PARSER_BEGIN(Assignment)
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
     
+    //Stack of function calls to be used in cycle detection of call to functions
     public static Stack<FunctionCall> calls = new Stack<FunctionCall>();
 
     //create new stack for function parameters to make sure function bodies only used corresponding parameters
@@ -21,13 +22,13 @@ PARSER_BEGIN(Assignment)
     public static void main(String args []) throws Throwable {
       try {
         Expression finalExpression = new Assignment(System.in).Program();
-        System.out.println("Syntax is okay: PASS");
+        System.out.println("PASS");
         
         //print out the final expression
-        System.out.println("Final: "+finalExpression);
-        System.out.println("After evaluation: "+expressionEvaluator(finalExpression.toString()));
+        // System.out.println("Final: "+finalExpression);
+        System.out.println(expressionEvaluator(finalExpression.toString()));
       } catch (Throwable e) {
-        if e.getMessage().contains("Recursive")
+        if (e.getMessage().contains("Recursive"))
           System.out.println("DIVERGENCE");
         else {
           System.out.println("Syntax error detected: FAIL");
@@ -148,8 +149,8 @@ PARSER_BEGIN(Assignment)
 
       public String toString() {
         if (calls.search(this) > -1) {
-          System.out.println("Error: Recursive function call");
-          throw new Error("Recursive function call");
+          // System.out.println("Error: Recursive function call");
+          throw new Error("Wrong Recursive function call");
         }
 
         calls.push(this);

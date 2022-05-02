@@ -22,13 +22,17 @@
         System.out.println("Final: "+finalExpression);
         System.out.println("After evaluation: "+expressionEvaluator(finalExpression.toString()));
       } catch (Throwable e) {
-        System.out.println("Syntax error detected: FAIL");
+        if (e.getMessage().contains("Recursive"))
+          System.out.println("DIVERGENCE");
+        else {
+          System.out.println("Syntax error detected: FAIL");
 
-        //check if e is an instance of error
-        if (e instanceof Error) {
-          System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
-        } else
-            System.err.println(e.getMessage());
+          //check if e is an instance of error
+          if (e instanceof Error) {
+            System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
+          } else
+              System.err.println(e.getMessage());
+        }
       }
     }
 
@@ -139,8 +143,8 @@
 
       public String toString() {
         if (calls.search(this) > -1) {
-          System.out.println("Error: Recursive function call");
-          throw new Error("Recursive function call");
+          // System.out.println("Error: Recursive function call");
+          throw new Error("Wrong Recursive function call");
         }
 
         calls.push(this);
@@ -524,11 +528,6 @@
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3_6() {
-    if (jj_scan_token(PARAM)) return true;
-    return false;
-  }
-
   private boolean jj_3R_8() {
     if (jj_scan_token(FUNC)) return true;
     if (jj_scan_token(LPAREN)) return true;
@@ -593,6 +592,11 @@
   private boolean jj_3R_5() {
     if (jj_3R_9()) return true;
     if (jj_scan_token(FUNC)) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(PARAM)) return true;
     return false;
   }
 
