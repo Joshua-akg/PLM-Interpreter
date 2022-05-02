@@ -251,8 +251,6 @@ TOKEN: { < NUM: (["0"-"9"])+ > }
 //Begining of a function definition
 TOKEN: { < DEFINE: <DEF> <SPACE> > }
 
-//Lexical Specification
-
 void Definition() throws Exception: {} {
   try {
     <DEFINE>
@@ -288,6 +286,7 @@ Expression Program() throws Exception: {Token t; double result;} {
     {
     //check if the all functionCalls are in the functionNames list
       for (String call : Assignment.functionCalls) {
+        //if a function call is not in the functionNames list, throw an exception
         if (!Assignment.functionNames.contains(call.substring(call.indexOf(" ")+1))) {
           String lineNumber = call.substring(0, call.indexOf(" "));
           throw new Exception(lineNumber+"\nWrong call to an undefined function");
@@ -296,9 +295,7 @@ Expression Program() throws Exception: {Token t; double result;} {
     }
 
   } catch (Exception e) { //Catch error thrown for duplicate main
-    //print message
-    // System.out.println(e.getMessage());
-
+    //if the message contains a "Wrong", propagate the exception
     if (e.getMessage().contains("Wrong"))
       throw e;
 
@@ -309,7 +306,7 @@ Expression Program() throws Exception: {Token t; double result;} {
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Naame Format");
   }
 
-  //return the result of the main function
+  //return the expression body of the main function
   {return functionDetails.get("MAIN").getBody();}
 }
 
@@ -319,9 +316,10 @@ Expression Main() throws Exception: {Expression ex;} {
   try {
     <MAIN>
     {
+      //add the function name "main" to the functionNames list
       Assignment.functionNames.add("MAIN");
     }
-  } catch (Exception e) { //Catch error thrown for missing main function
+  } catch (Exception e) { //Catch possible exceptions that can be thrown
     if (e.getMessage().contains("DEF")) {
       throw new Exception(getLineNumber(e.getMessage())+"\nWrong Format - Function cannot be called DEF");
     }
@@ -330,23 +328,29 @@ Expression Main() throws Exception: {Expression ex;} {
       throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
     }
 
+    //catch exception for missing main function
     throw new Exception("0\nWrong Program Structure - Missing Main Function");
   }
 
   try {
+    //let the expression to be returned be the expression in the function body
     ex = FunctionBody()
 
     try {
+      //check that the function ends properly
       <SCOLON> <EOL>
-    } catch (Exception e) { //Catch error thrown for wrong line terminator
+    } catch (Exception e) { //Catch possible exceptions that can be thrown
+      //propagate other exceptions
       if (e.getMessage().contains("Wrong"))
         throw e;
 
+      //Catch error thrown for wrong line terminator
       //throw new excpetion with a custom message
       throw new Exception(getLineNumber(e.getMessage())+"\nWrong function terminator");
     }
 
     {
+      //add the main function's details to the hashmap
       functionDetails.put("MAIN", new Function("",ex));
       return ex;
     }
@@ -363,32 +367,41 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
   Definition()
   try {
     t = <FUNC> 
-    { //Check if a function with the same name has already been defined
+    { 
+      //Check if a function with the same name has already been defined
       functionName = t.image;
+
+      //if it has, throw a new exception as there's a duplicate function
       if (functionNames.contains(functionName)) {
         throw new Exception(t.beginLine+"\nWrong Program Structure - '" + functionName + "' already defined");
       } else {
         functionNames.add(functionName);
       }
-    } //throw exception and catch it to get line number of param and then add that to the map
+    } 
+
     <SPACE> 
 
     p = <PARAM> 
     {functionParams.push(p.image);} 
 
+    //set the resulting expression to be the function body
     ex = FunctionBody()
 
     try {
+      //check that the function ends properly
       <SCOLON> <EOL>
-    } catch (Exception e) { //Catch error thrown for wrong line terminator
+    } catch (Exception e) { 
+      //propagrate thrown exception
       if (e.getMessage().contains("Wrong"))
         throw e;
 
-      //throw new excpetion with a custom message
+      //Catch error thrown for wrong line terminator
+      //throw new exception with a custom message
       throw new Exception(getLineNumber(e.getMessage())+"\nWrong function terminator");
     }
 
     {
+      //add the function's details to the hashmap
       functionDetails.put(functionName, new Function(p.image, ex));
       return ex;
     }
@@ -401,9 +414,6 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
     if (e.getMessage().contains("PARAM"))
       throw new Exception(getLineNumber(e.getMessage())+"\nWrong Parameter Format");
 
-    //print the error message
-    // System.out.println(e.getMessage());
-
     //throw new excpetion with a custom message
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Name Format");
   }
@@ -412,25 +422,29 @@ Expression Function() throws Exception:{ String functionName = ""; Token t; Toke
 //FunctionBody -> LBRACE EXPR RBRACE SCOLON EOL
 Expression FunctionBody() throws Exception: {Expression ex;} {
   try {
-    <SPACE> <LBRACE> <SPACE> 
+    <SPACE> <LBRACE> <SPACE>
+    //set the resulting expression to that contained within the body
       ex = Expression()
     <SPACE> <RBRACE> <SPACE>
     {return ex;}
-  } catch (Exception e) { //Catch error thrown for wrong expression
+  } catch (Exception e) {
+    //propagate exception
     if (e.getMessage().contains("Wrong"))
       throw e;
 
+    //catch exception for wrong function body format 
     throw new Exception(getLineNumber(e.getMessage())+"\nWrong Function Body Format");
   }
 }
 
 //split expressions into terms to preserve order of operations
-//EXPR -> TERM ADD TERM | TERM
+//EXPR -> TERM ADD TERM | TERM    //after factorisation
 Expression Expression() throws Exception: {Expression left, right;} {
   try {
     left = Term() 
       ( 
-        <ADD> right = Term() 
+        <ADD> right = Term()
+        //return the binary expression generated by the left and right terms
         {left = new Binary(left, "+", right);}
       )*
     {return left;}
@@ -450,6 +464,7 @@ Expression Term() throws Exception: {Expression left, right;} {
     left = Factor() 
       ( 
         <MUL> right = Factor()
+        //return the binary expression generated by the left and right terms
         {left = new Binary(left, "*", right);}
       )*
     {return left;}
