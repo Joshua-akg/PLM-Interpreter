@@ -6,6 +6,10 @@ options{
 PARSER_BEGIN(Assignment)
   import java.util.*;
   public class Assignment{
+    public static final String TEXT_RESET = "\u001B[0m";
+    public static final String TEXT_RED = "\u001B[31m";
+    public static final String TEXT_GREEN = "\u001B[32m";
+
     //Arraylist for function names and calls to make sure all calls are to functions in the program
     public static ArrayList<String> functionCalls = new ArrayList<String>();
     public static ArrayList<String> functionNames = new ArrayList<String>();
@@ -22,43 +26,59 @@ PARSER_BEGIN(Assignment)
     public static void main(String args []) throws Throwable {
       try {
         Expression finalExpression = new Assignment(System.in).Program();
-        System.out.println("PASS");
+
+        //print the result of parsing the PLM
+        System.out.println(TEXT_GREEN + "PASS" + TEXT_RESET);
         
-        //print out the final expression
-        // System.out.println("Final: "+finalExpression);
-        System.out.println(expressionEvaluator(finalExpression.toString()));
+        //print the result of evaluating the PLM
+        System.out.println(TEXT_GREEN + expressionEvaluator(finalExpression.toString()) + TEXT_RESET);
       } catch (Throwable e) {
+        //catch errors thrown from programs which do not evaluate to a number
         if (e.getMessage().contains("Recursive"))
-          System.out.println("DIVERGENCE");
+          System.out.println(TEXT_GREEN + "DIVERGENCE" + TEXT_RESET);
         else {
-          System.out.println("Syntax error detected: FAIL");
+          //print the result of parsing the PLM
+          System.out.println(TEXT_GREEN + "FAIL" + TEXT_RESET);
           
-          //check if e is an instance of error
+          //check if e is an error vs an exception, which would be thrown if a non-token is found
           if (e instanceof Error) {
-            System.err.println(getLineNumber(e.getMessage())+"\nWrong character - Non-token found");
-          } else 
-              System.err.println(e.getMessage());
+            System.err.println(TEXT_RED + getLineNumber(e.getMessage())+"\nWrong character - Non-token found" + TEXT_RESET);
+          } else
+            //Otherwise print whatever exception was thrown by the parser
+              System.err.println(TEXT_RED + e.getMessage() + TEXT_RESET);
         }
       }  
     }
 
     //evaluator for the final expression
     public static int expressionEvaluator(String finalExpression) {
+      //declare the numbers and operators expected in the expression
       String numbers = "0123456789";
       String op = "*+";
 
+      //convert expression to a character array
       char[] characters = finalExpression.toCharArray();
+
+      //declare a stack to store the numbers used in the evaluation
       Stack<Integer> intStack = new Stack<Integer>();
+
+      //declare a last character to use in checking if numbers consist of multiple digits
       char last = ' ';
 
+      //loop through all characters in the final expression
       for (char ch : characters) {
-        // System.out.println("Current char: "+ch);
+        //if the character is a number
         if (numbers.contains(ch+"")) {
+          //check if the last character was also a number
           if (numbers.contains(last+"")) {
+            //if it was then remove the last number from the stack and add the current number to it times 10
             intStack.push(10*(intStack.pop() + (ch - '0')));
-          } else
-            intStack.push(ch - '0'); // convert char to int val
+          } else    //otherwise just add the current number to the stack
+            intStack.push(ch - '0');
+
+        //if the current character is an operator
         } else if (op.contains(ch+"")) {
+          //pop the last two numbers from the stack and perform the operation
           int num1 = intStack.pop();
           int num2 = intStack.pop();
           int result;
@@ -71,8 +91,10 @@ PARSER_BEGIN(Assignment)
             intStack.push(result);
           }
         }
+        //set the last character to the current character just checked
         last = ch;
       }
+      //return the final result on the stack
       return intStack.pop();
     }
     
@@ -219,7 +241,7 @@ void Definition() throws Exception: {} {
     <DEFINE>
   } catch (Exception e) { //Catch error thrown for wrong expression
     if (e.getMessage().contains("EOF")) {
-      throw new Exception("0\nWrong Program Structure - Missing Main FUnction");
+      throw new Exception("0\nWrong Program Structure - Missing Main Function");
     }
 
     //throw new excpetion with a custom message

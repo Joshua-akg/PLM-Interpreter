@@ -4,7 +4,8 @@ import os
 PATH = './'
 FILENAME = 'Assignment.jj'
 TESTPATH = './tests'
-
+OUTPATH = 'output.txt'
+ERRORPATH = 'err.txt'
 
 def main():
     cmd = f'javacc {FILENAME} && javac *.java'
